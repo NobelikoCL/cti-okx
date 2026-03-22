@@ -138,6 +138,7 @@ const DEFAULT_SCANNER_CONFIG: ScannerConfig = {
   telegram_cooldown_minutes: 15,
   telegram_min_confidence_tg: 0,
   telegram_regression_reversal: false,
+  scan_interval_minutes: 15,
 };
 
 export async function fetchScannerConfig(): Promise<ScannerConfig> {

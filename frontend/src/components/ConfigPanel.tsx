@@ -38,6 +38,7 @@ export default function ConfigPanel() {
     telegram_cooldown_minutes:       15,
     telegram_min_confidence_tg:      0,
     telegram_regression_reversal:    false,
+    scan_interval_minutes:           15,
   });
   const [saved, setSaved] = useState(false);
 
@@ -293,6 +294,30 @@ export default function ConfigPanel() {
           </div>
           <p className="text-xs text-gray-500">Señales por debajo no disparan alerta TG</p>
         </div>
+      </div>
+
+      {/* Auto-scan interval */}
+      <div className="border-t border-gray-700 pt-4 space-y-2">
+        <p className="text-xs text-gray-400 uppercase tracking-wide font-medium">
+          🕐 Escaneo automático 24/7
+        </p>
+        <div className="flex items-center gap-3">
+          <input
+            type="range"
+            min={1}
+            max={60}
+            step={1}
+            value={form.scan_interval_minutes}
+            onChange={(e) => update("scan_interval_minutes", parseInt(e.target.value))}
+            className="flex-1 accent-blue-500"
+          />
+          <span className="text-sm text-gray-300 w-16 text-right font-mono">
+            cada {form.scan_interval_minutes} min
+          </span>
+        </div>
+        <p className="text-xs text-gray-500">
+          El scanner corre en el servidor continuamente — sin importar si esta pantalla está abierta
+        </p>
       </div>
 
       <div className="flex items-center justify-between pt-1">

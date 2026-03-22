@@ -40,6 +40,9 @@ class ScannerConfig(models.Model):
     # Only send regression signals when slope changed direction (alcista↔bajista)
     telegram_regression_reversal   = models.BooleanField(default=False)
 
+    # Automatic scan interval (minutes) — controls Celery Beat schedule
+    scan_interval_minutes = models.PositiveIntegerField(default=15)
+
     def should_telegram(self, signal_type: str, trend_reversal: bool = False) -> bool:
         if signal_type in ("BREAKOUT_BULL", "BREAKOUT_BEAR"):
             if not self.telegram_breakout:

@@ -190,6 +190,7 @@ def scanner_config(request):
             "telegram_cooldown_minutes":     cfg.telegram_cooldown_minutes,
             "telegram_min_confidence_tg":    cfg.telegram_min_confidence_tg,
             "telegram_regression_reversal":  cfg.telegram_regression_reversal,
+            "scan_interval_minutes":         cfg.scan_interval_minutes,
         })
 
     # POST — update fields
@@ -199,12 +200,24 @@ def scanner_config(request):
         "telegram_breakout", "telegram_volume", "telegram_regression",
         "telegram_reversal_filter", "ema_fast", "ema_slow",
         "telegram_cooldown_minutes", "telegram_min_confidence_tg",
-        "telegram_regression_reversal",
+        "telegram_regression_reversal", "scan_interval_minutes",
     }
     for field, value in request.data.items():
         if field in allowed:
             setattr(cfg, field, value)
     cfg.save()
+
+    # Update Celery Beat PeriodicTask schedule so it takes effect without restart
+    try:
+        from django_celery_beat.models import PeriodicTask, IntervalSchedule
+        interval, _ = IntervalSchedule.objects.get_or_create(
+            every=cfg.scan_interval_minutes,
+            period=IntervalSchedule.MINUTES,
+        )
+        PeriodicTask.objects.filter(name="scan-markets-periodic").update(interval=interval)
+    except Exception as exc:
+        logger.warning("Could not update PeriodicTask schedule: %s", exc)
+
     return Response({"success": True})
 
 

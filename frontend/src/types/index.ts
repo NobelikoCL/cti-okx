@@ -67,6 +67,7 @@ export interface ScannerConfig {
   telegram_cooldown_minutes: number;
   telegram_min_confidence_tg: number;
   telegram_regression_reversal: boolean;
+  scan_interval_minutes: number;
 }
 
 export interface SignalFilters {
