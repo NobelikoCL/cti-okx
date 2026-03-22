@@ -97,7 +97,11 @@ def scan_markets(self):
     from apps.scanner.analysis import analyze_symbol
     from apps.scanner.models import ScannerConfig
 
+    from django.core.cache import cache
+    from django.utils.timezone import now as tz_now
     cfg = ScannerConfig.get()
+    cache.set("scanner:is_scanning", True,  timeout=600)
+    cache.set("scanner:last_scan_at", tz_now().isoformat(), timeout=86400)
     logger.info("scan_markets started")
     instruments = get_top_symbols_by_volume(cfg.top_symbols_count)
     if not instruments:
@@ -143,6 +147,7 @@ def scan_markets(self):
             logger.exception("Error analyzing %s: %s", inst_id, exc)
             continue
 
+    cache.set("scanner:is_scanning", False, timeout=86400)
     logger.info("scan_markets finished: %d new signals", total_signals)
     return total_signals
 

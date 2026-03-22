@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useSignals, useTriggerScan } from "../hooks/useSignals";
+import { useSignals, useTriggerScan, useScannerStatus } from "../hooks/useSignals";
 import StatsBar from "../components/StatsBar";
 import FilterBar from "../components/FilterBar";
 import SignalTable from "../components/SignalTable";
@@ -28,8 +28,10 @@ export default function Dashboard() {
   const [filters, setFilters] = useState<SignalFilters>(DEFAULT_FILTERS);
   const [showTelegram, setShowTelegram] = useState(false);
   const [showConfig, setShowConfig]     = useState(false);
-  const scanMutation = useTriggerScan();
-  const recentCount  = useRecentCount(15);
+  const scanMutation  = useTriggerScan();
+  const { data: scanStatus } = useScannerStatus();
+  const recentCount   = useRecentCount(15);
+  const isScanning    = scanMutation.isPending || !!scanStatus?.is_scanning;
 
   const updateFilters = (partial: Partial<SignalFilters>) => {
     setFilters((prev) => ({ ...prev, ...partial }));
@@ -72,10 +74,12 @@ export default function Dashboard() {
             </button>
             <button
               onClick={() => scanMutation.mutate()}
-              disabled={scanMutation.isPending}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-700 hover:bg-blue-600 disabled:opacity-50 rounded-lg text-sm font-medium transition-colors"
+              disabled={isScanning}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-700 hover:bg-blue-600 disabled:opacity-60 rounded-lg text-sm font-medium transition-colors"
             >
-              {scanMutation.isPending ? <span className="animate-spin">⟳</span> : "▶ Escanear ahora"}
+              {isScanning
+                ? <><span className="animate-spin inline-block">⟳</span> Escaneando…</>
+                : "▶ Escanear ahora"}
             </button>
           </div>
         </div>

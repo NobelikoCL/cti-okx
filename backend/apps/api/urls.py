@@ -9,7 +9,8 @@ urlpatterns = [
     path("signals/<int:pk>/send/", views.send_signal_telegram, name="send-signal"),
 
     # Scanner
-    path("scanner/run/", views.trigger_scan, name="trigger-scan"),
+    path("scanner/run/",    views.trigger_scan,    name="trigger-scan"),
+    path("scanner/status/", views.scanner_status,  name="scanner-status"),
 
     # Telegram
     path("telegram/status/", views.telegram_status, name="telegram-status"),

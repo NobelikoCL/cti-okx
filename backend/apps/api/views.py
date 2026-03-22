@@ -207,6 +207,19 @@ def scanner_config(request):
 
 
 @api_view(["GET"])
+def scanner_status(request):
+    """
+    GET /api/scanner/status/
+    Returns whether the scanner is currently running and when it last ran.
+    """
+    from django.core.cache import cache
+    return Response({
+        "is_scanning": bool(cache.get("scanner:is_scanning", False)),
+        "last_scan_at": cache.get("scanner:last_scan_at"),
+    })
+
+
+@api_view(["GET"])
 def instruments_list(request):
     """
     GET /api/instruments/

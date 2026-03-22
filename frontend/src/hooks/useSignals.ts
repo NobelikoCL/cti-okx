@@ -10,6 +10,7 @@ import {
   configureTelegram,
   fetchScannerConfig,
   saveScannerConfig,
+  fetchScannerStatus,
 } from "../lib/api";
 import type { SignalFilters } from "../types";
 
@@ -83,6 +84,15 @@ export function useScannerConfig() {
   return useQuery({
     queryKey: ["scanner-config"],
     queryFn: fetchScannerConfig,
+  });
+}
+
+export function useScannerStatus(enabled = true) {
+  return useQuery({
+    queryKey: ["scanner-status"],
+    queryFn: fetchScannerStatus,
+    refetchInterval: (q) => (q.state.data?.is_scanning ? 2000 : 5000),
+    enabled,
   });
 }
 
