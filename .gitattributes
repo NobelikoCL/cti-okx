@@ -1,0 +1,9 @@
+# Normalize line endings
+* text=auto
+
+# Shell scripts must use LF (for Linux/Ubuntu server)
+*.sh text eol=lf
+Makefile text eol=lf
+
+# Windows-only files
+*.cmd text eol=crlf
