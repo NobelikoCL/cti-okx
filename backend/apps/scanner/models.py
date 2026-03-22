@@ -34,6 +34,10 @@ class ScannerConfig(models.Model):
     ema_fast = models.PositiveIntegerField(default=9)
     ema_slow = models.PositiveIntegerField(default=21)
 
+    # Telegram noise filters
+    telegram_cooldown_minutes  = models.PositiveIntegerField(default=15)
+    telegram_min_confidence_tg = models.FloatField(default=0.0)
+
     def should_telegram(self, signal_type: str, trend_reversal: bool = False) -> bool:
         if signal_type in ("BREAKOUT_BULL", "BREAKOUT_BEAR"):
             if not self.telegram_breakout:

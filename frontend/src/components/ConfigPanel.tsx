@@ -35,6 +35,8 @@ export default function ConfigPanel() {
     telegram_reversal_filter: false,
     ema_fast:                 9,
     ema_slow:                 21,
+    telegram_cooldown_minutes:  15,
+    telegram_min_confidence_tg: 0,
   });
   const [saved, setSaved] = useState(false);
 
@@ -224,6 +226,53 @@ export default function ConfigPanel() {
               </div>
             </div>
           )}
+        </div>
+      </div>
+
+      {/* Noise filters */}
+      <div className="border-t border-gray-700 pt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {/* Cooldown */}
+        <div className="space-y-1.5">
+          <label className="text-xs text-gray-400 uppercase tracking-wide font-medium">
+            ⏱ Cooldown entre alertas
+          </label>
+          <div className="flex items-center gap-3">
+            <input
+              type="range"
+              min={0}
+              max={120}
+              step={5}
+              value={form.telegram_cooldown_minutes}
+              onChange={(e) => update("telegram_cooldown_minutes", parseInt(e.target.value))}
+              className="flex-1 accent-blue-500"
+            />
+            <span className="text-sm text-gray-300 w-14 text-right font-mono">
+              {form.telegram_cooldown_minutes === 0 ? "sin límite" : `${form.telegram_cooldown_minutes} min`}
+            </span>
+          </div>
+          <p className="text-xs text-gray-500">Mismo activo+tipo no se reenvía antes de este tiempo</p>
+        </div>
+
+        {/* Min confidence for TG */}
+        <div className="space-y-1.5">
+          <label className="text-xs text-gray-400 uppercase tracking-wide font-medium">
+            🎯 Confianza mínima para Telegram
+          </label>
+          <div className="flex items-center gap-3">
+            <input
+              type="range"
+              min={0}
+              max={1}
+              step={0.05}
+              value={form.telegram_min_confidence_tg}
+              onChange={(e) => update("telegram_min_confidence_tg", parseFloat(e.target.value))}
+              className="flex-1 accent-blue-500"
+            />
+            <span className="text-sm text-gray-300 w-10 text-right font-mono">
+              {Math.round(form.telegram_min_confidence_tg * 100)}%
+            </span>
+          </div>
+          <p className="text-xs text-gray-500">Señales por debajo no disparan alerta TG</p>
         </div>
       </div>
 

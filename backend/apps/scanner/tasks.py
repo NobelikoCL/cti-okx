@@ -14,6 +14,20 @@ logger = logging.getLogger(__name__)
 DEDUP_WINDOW_MINUTES: int = 30  # ignore duplicate signal within this window
 
 
+def _telegram_cooldown_ok(symbol: str, signal_type: str, cooldown_minutes: int) -> bool:
+    """Return True if no Telegram was sent for this symbol+type within cooldown_minutes."""
+    from apps.signals.models import Signal
+    if cooldown_minutes <= 0:
+        return True
+    cutoff = timezone.now() - timedelta(minutes=cooldown_minutes)
+    return not Signal.objects.filter(
+        symbol=symbol,
+        signal_type=signal_type,
+        is_sent_telegram=True,
+        created_at__gte=cutoff,
+    ).exists()
+
+
 def _is_duplicate(symbol: str, signal_type: str, timeframe: str) -> bool:
     """Return True if the same signal was already emitted within the dedup window."""
     from apps.signals.models import Signal
@@ -113,7 +127,11 @@ def scan_markets(self):
                 signal = _save_signal(data)
                 total_signals += 1
 
-                if cfg.should_telegram(signal.signal_type, trend_reversal=bool(signal.trend_reversal)):
+                if (
+                    cfg.should_telegram(signal.signal_type, trend_reversal=bool(signal.trend_reversal))
+                    and signal.confidence >= cfg.telegram_min_confidence_tg
+                    and _telegram_cooldown_ok(signal.symbol, signal.signal_type, cfg.telegram_cooldown_minutes)
+                ):
                     from apps.alerts.tasks import send_telegram_alert
                     send_telegram_alert.apply_async(
                         args=[signal.id],
