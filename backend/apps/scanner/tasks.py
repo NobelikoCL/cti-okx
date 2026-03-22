@@ -102,6 +102,9 @@ def scan_markets(self):
     cfg = ScannerConfig.get()
     cache.set("scanner:is_scanning", True,  timeout=600)
     cache.set("scanner:last_scan_at", tz_now().isoformat(), timeout=86400)
+    # running_since: only set on first scan after a fresh start (30-day TTL)
+    if not cache.get("scanner:running_since"):
+        cache.set("scanner:running_since", tz_now().isoformat(), timeout=86400 * 30)
     logger.info("scan_markets started")
     instruments = get_top_symbols_by_volume(cfg.top_symbols_count)
     if not instruments:

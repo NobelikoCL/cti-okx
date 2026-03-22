@@ -68,14 +68,20 @@ export async function sendAllUnsent(): Promise<{ count: number }> {
   return { count: MOCK_SIGNALS.filter((s) => !s.is_sent_telegram).length };
 }
 
-export async function fetchScannerStatus(): Promise<{ is_scanning: boolean; last_scan_at: string | null }> {
+export interface ScannerStatus {
+  is_scanning: boolean;
+  last_scan_at: string | null;
+  running_since: string | null;
+}
+
+export async function fetchScannerStatus(): Promise<ScannerStatus> {
   try {
-    const { data } = await client.get<{ is_scanning: boolean; last_scan_at: string | null }>("/scanner/status/");
+    const { data } = await client.get<ScannerStatus>("/scanner/status/");
     if (isValidJson(data)) return data;
   } catch {
     // fall through
   }
-  return { is_scanning: false, last_scan_at: null };
+  return { is_scanning: false, last_scan_at: null, running_since: null };
 }
 
 export async function triggerScan(): Promise<{ task_id: string }> {

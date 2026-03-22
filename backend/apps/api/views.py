@@ -229,8 +229,9 @@ def scanner_status(request):
     """
     from django.core.cache import cache
     return Response({
-        "is_scanning": bool(cache.get("scanner:is_scanning", False)),
-        "last_scan_at": cache.get("scanner:last_scan_at"),
+        "is_scanning":   bool(cache.get("scanner:is_scanning", False)),
+        "last_scan_at":  cache.get("scanner:last_scan_at"),
+        "running_since": cache.get("scanner:running_since"),
     })
 
 
