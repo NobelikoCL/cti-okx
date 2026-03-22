@@ -1,9 +1,21 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { es } from "date-fns/locale";
 import { useSignals, useSendSignal } from "../hooks/useSignals";
 import type { Signal, SignalFilters } from "../types";
 import clsx from "clsx";
+
+const REFETCH_INTERVAL = 30; // seconds
+
+function useCountdown(seconds: number, trigger: unknown) {
+  const [remaining, setRemaining] = useState(seconds);
+  useEffect(() => {
+    setRemaining(seconds);
+    const id = setInterval(() => setRemaining((s) => (s <= 1 ? seconds : s - 1)), 1000);
+    return () => clearInterval(id);
+  }, [seconds, trigger]);
+  return remaining;
+}
 
 const TYPE_BADGE: Record<string, string> = {
   BREAKOUT_BULL:   "bg-emerald-900 text-emerald-300 border-emerald-700",
@@ -26,8 +38,9 @@ interface Props {
 export default function SignalTable({ filters }: Props) {
   const [page, setPage] = useState(0);
   const PAGE_SIZE = 50;
-  const { data, isLoading, isFetching } = useSignals(filters, page, PAGE_SIZE);
+  const { data, isLoading, isFetching, dataUpdatedAt } = useSignals(filters, page, PAGE_SIZE);
   const sendMutation = useSendSignal();
+  const countdown = useCountdown(REFETCH_INTERVAL, dataUpdatedAt);
 
   const signals    = data?.results ?? [];
   const total      = data?.count ?? 0;
@@ -37,7 +50,17 @@ export default function SignalTable({ filters }: Props) {
     <div className="space-y-3">
       <div className="flex items-center justify-between text-sm text-gray-400">
         <span>{total} señales encontradas</span>
-        {isFetching && <span className="text-xs text-blue-400 animate-pulse">Actualizando…</span>}
+        <div className="flex items-center gap-3 text-xs">
+          {isFetching
+            ? <span className="text-blue-400 animate-pulse">⟳ Actualizando…</span>
+            : <span className="text-gray-500">
+                próxima actualización en{" "}
+                <span className={clsx("font-mono", countdown <= 5 ? "text-amber-400" : "text-gray-400")}>
+                  {countdown}s
+                </span>
+              </span>
+          }
+        </div>
       </div>
 
       <div className="overflow-x-auto rounded-xl border border-gray-700">
