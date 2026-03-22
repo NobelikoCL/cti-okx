@@ -24,6 +24,20 @@ class ScannerConfig(models.Model):
     top_symbols_count = models.PositiveIntegerField(default=50)
     min_confidence    = models.FloatField(default=0.0)
 
+    # Auto-send to Telegram by signal type
+    telegram_breakout   = models.BooleanField(default=True)
+    telegram_volume     = models.BooleanField(default=False)
+    telegram_regression = models.BooleanField(default=False)
+
+    def should_telegram(self, signal_type: str) -> bool:
+        if signal_type in ("BREAKOUT_BULL", "BREAKOUT_BEAR"):
+            return self.telegram_breakout
+        if signal_type == "VOLUME_ANOMALY":
+            return self.telegram_volume
+        if signal_type in ("REGRESSION_BULL", "REGRESSION_BEAR"):
+            return self.telegram_regression
+        return False
+
     class Meta:
         verbose_name = "Scanner Config"
 

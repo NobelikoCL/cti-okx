@@ -119,6 +119,9 @@ const DEFAULT_SCANNER_CONFIG: ScannerConfig = {
   regression_tf: "1H",
   top_symbols_count: 50,
   min_confidence: 0,
+  telegram_breakout: true,
+  telegram_volume: false,
+  telegram_regression: false,
 };
 
 export async function fetchScannerConfig(): Promise<ScannerConfig> {

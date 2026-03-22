@@ -56,6 +56,9 @@ export interface ScannerConfig {
   regression_tf: string;
   top_symbols_count: number;
   min_confidence: number;
+  telegram_breakout: boolean;
+  telegram_volume: boolean;
+  telegram_regression: boolean;
 }
 
 export interface SignalFilters {

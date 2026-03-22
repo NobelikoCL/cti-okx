@@ -67,7 +67,9 @@ def scan_markets(self):
     """
     from apps.scanner.okx_client import get_top_symbols_by_volume, get_funding_rate
     from apps.scanner.analysis import analyze_symbol
+    from apps.scanner.models import ScannerConfig
 
+    cfg = ScannerConfig.get()
     logger.info("scan_markets started")
     instruments = get_top_symbols_by_volume()
     if not instruments:
@@ -97,11 +99,12 @@ def scan_markets(self):
                 signal = _save_signal(data)
                 total_signals += 1
 
-                from apps.alerts.tasks import send_telegram_alert
-                send_telegram_alert.apply_async(
-                    args=[signal.id],
-                    queue="alerts",
-                )
+                if cfg.should_telegram(signal.signal_type):
+                    from apps.alerts.tasks import send_telegram_alert
+                    send_telegram_alert.apply_async(
+                        args=[signal.id],
+                        queue="alerts",
+                    )
 
             time.sleep(0.2)
         except Exception as exc:

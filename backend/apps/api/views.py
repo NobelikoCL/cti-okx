@@ -176,15 +176,22 @@ def scanner_config(request):
 
     if request.method == "GET":
         return Response({
-            "breakout_tf":       cfg.breakout_tf,
-            "volume_tf":         cfg.volume_tf,
-            "regression_tf":     cfg.regression_tf,
-            "top_symbols_count": cfg.top_symbols_count,
-            "min_confidence":    cfg.min_confidence,
+            "breakout_tf":        cfg.breakout_tf,
+            "volume_tf":          cfg.volume_tf,
+            "regression_tf":      cfg.regression_tf,
+            "top_symbols_count":  cfg.top_symbols_count,
+            "min_confidence":     cfg.min_confidence,
+            "telegram_breakout":  cfg.telegram_breakout,
+            "telegram_volume":    cfg.telegram_volume,
+            "telegram_regression": cfg.telegram_regression,
         })
 
     # POST — update fields
-    allowed = {"breakout_tf", "volume_tf", "regression_tf", "top_symbols_count", "min_confidence"}
+    allowed = {
+        "breakout_tf", "volume_tf", "regression_tf",
+        "top_symbols_count", "min_confidence",
+        "telegram_breakout", "telegram_volume", "telegram_regression",
+    }
     for field, value in request.data.items():
         if field in allowed:
             setattr(cfg, field, value)

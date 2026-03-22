@@ -24,11 +24,14 @@ export default function ConfigPanel() {
   const saveMutation = useSaveScannerConfig();
 
   const [form, setForm] = useState<ScannerConfig>({
-    breakout_tf:       "15m",
-    volume_tf:         "15m",
-    regression_tf:     "1H",
-    top_symbols_count: 50,
-    min_confidence:    0,
+    breakout_tf:        "15m",
+    volume_tf:          "15m",
+    regression_tf:      "1H",
+    top_symbols_count:  50,
+    min_confidence:     0,
+    telegram_breakout:  true,
+    telegram_volume:    false,
+    telegram_regression: false,
   });
   const [saved, setSaved] = useState(false);
 
@@ -37,7 +40,7 @@ export default function ConfigPanel() {
     if (remote) setForm(remote);
   }, [remote]);
 
-  const update = (field: keyof ScannerConfig, value: string | number) =>
+  const update = (field: keyof ScannerConfig, value: string | number | boolean) =>
     setForm((prev) => ({ ...prev, [field]: value }));
 
   const handleSave = async () => {
@@ -148,6 +151,33 @@ export default function ConfigPanel() {
           </div>
           <p className="text-xs text-gray-500">Señales por debajo se descartan</p>
         </div>
+      </div>
+
+      {/* Telegram auto-send */}
+      <div className="border-t border-gray-700 pt-4 space-y-3">
+        <p className="text-xs text-gray-400 uppercase tracking-wide font-medium">
+          📱 Enviar automáticamente a Telegram
+        </p>
+        <div className="flex flex-wrap gap-4">
+          {[
+            { field: "telegram_breakout",   label: "📈 Ruptura" },
+            { field: "telegram_volume",     label: "⚡ Volumen" },
+            { field: "telegram_regression", label: "📐 Tendencia" },
+          ].map(({ field, label }) => (
+            <label key={field} className="flex items-center gap-2 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={form[field as keyof ScannerConfig] as boolean}
+                onChange={(e) => update(field as keyof ScannerConfig, e.target.checked)}
+                className="w-4 h-4 accent-blue-500"
+              />
+              <span className="text-sm text-gray-300">{label}</span>
+            </label>
+          ))}
+        </div>
+        <p className="text-xs text-gray-500">
+          Solo los tipos marcados dispararán alertas Telegram al detectarse
+        </p>
       </div>
 
       <div className="flex items-center justify-between pt-1">
