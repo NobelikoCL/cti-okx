@@ -66,6 +66,7 @@ export interface ScannerConfig {
   ema_slow: number;
   telegram_cooldown_minutes: number;
   telegram_min_confidence_tg: number;
+  telegram_regression_reversal: boolean;
 }
 
 export interface SignalFilters {

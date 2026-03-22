@@ -35,21 +35,27 @@ class ScannerConfig(models.Model):
     ema_slow = models.PositiveIntegerField(default=21)
 
     # Telegram noise filters
-    telegram_cooldown_minutes  = models.PositiveIntegerField(default=15)
-    telegram_min_confidence_tg = models.FloatField(default=0.0)
+    telegram_cooldown_minutes      = models.PositiveIntegerField(default=15)
+    telegram_min_confidence_tg     = models.FloatField(default=0.0)
+    # Only send regression signals when slope changed direction (alcista↔bajista)
+    telegram_regression_reversal   = models.BooleanField(default=False)
 
     def should_telegram(self, signal_type: str, trend_reversal: bool = False) -> bool:
         if signal_type in ("BREAKOUT_BULL", "BREAKOUT_BEAR"):
             if not self.telegram_breakout:
                 return False
-            # If reversal filter is ON, only send when EMA crossover detected
             if self.telegram_reversal_filter and not trend_reversal:
                 return False
             return True
         if signal_type == "VOLUME_ANOMALY":
             return self.telegram_volume
         if signal_type in ("REGRESSION_BULL", "REGRESSION_BEAR"):
-            return self.telegram_regression
+            if not self.telegram_regression:
+                return False
+            # If regression reversal filter is ON, only send when slope changed direction
+            if self.telegram_regression_reversal and not trend_reversal:
+                return False
+            return True
         return False
 
     class Meta:

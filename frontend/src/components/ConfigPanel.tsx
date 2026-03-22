@@ -35,8 +35,9 @@ export default function ConfigPanel() {
     telegram_reversal_filter: false,
     ema_fast:                 9,
     ema_slow:                 21,
-    telegram_cooldown_minutes:  15,
-    telegram_min_confidence_tg: 0,
+    telegram_cooldown_minutes:       15,
+    telegram_min_confidence_tg:      0,
+    telegram_regression_reversal:    false,
   });
   const [saved, setSaved] = useState(false);
 
@@ -226,6 +227,24 @@ export default function ConfigPanel() {
               </div>
             </div>
           )}
+        </div>
+
+        {/* Regression reversal filter */}
+        <div className="mt-3 p-3 bg-gray-900/60 rounded-lg border border-gray-600 space-y-2">
+          <label className="flex items-center gap-2 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={form.telegram_regression_reversal}
+              onChange={(e) => update("telegram_regression_reversal", e.target.checked)}
+              className="w-4 h-4 accent-blue-500"
+            />
+            <span className="text-sm text-gray-200 font-medium">
+              🔄 Exigir cambio de color de regresión (pendiente alcista↔bajista)
+            </span>
+          </label>
+          <p className="text-xs text-gray-500 pl-6">
+            Solo envía señal de tendencia si la línea de regresión cambió de dirección vs el período anterior
+          </p>
         </div>
       </div>
 
