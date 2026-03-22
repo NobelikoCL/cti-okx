@@ -219,6 +219,10 @@ def detect_regression_signal(candles: list[dict], timeframe: str = "1H") -> Opti
     LSRL sobre los cierres de velas 1H (>=20 velas recomendado).
     Usa scipy.stats.linregress para obtener p-value y R².
     Señal solo si R² >= REGRESSION_R2_MIN y p_value < REGRESSION_PVALUE_MAX.
+
+    Detecta cambio de color (trend_reversal=True) cuando la pendiente actual
+    tiene signo opuesto a la pendiente de la ventana anterior — indica que la
+    línea de regresión cambió de alcista a bajista o viceversa.
     """
     if len(candles) < 10:
         return None
@@ -238,6 +242,16 @@ def detect_regression_signal(candles: list[dict], timeframe: str = "1H") -> Opti
 
     rsi_val = _rsi(closes)
     atr_val = _atr(candles)
+
+    # Detectar cambio de color: comparar pendiente actual vs ventana anterior
+    regression_reversal = False
+    if len(candles) >= 20:
+        mid = max(len(candles) // 2, 10)
+        prev_closes = _closes(candles[:mid])
+        if len(prev_closes) >= 5:
+            prev_x = np.arange(len(prev_closes), dtype=float)
+            prev_slope, *_ = scipy_stats.linregress(prev_x, prev_closes)
+            regression_reversal = bool((float(prev_slope) * slope) < 0)
 
     # Confianza compuesta multi-factor (Tier 3.3)
     r2_factor    = (r2 - REGRESSION_R2_MIN) / max(1.0 - REGRESSION_R2_MIN, 1e-9)
@@ -261,6 +275,7 @@ def detect_regression_signal(candles: list[dict], timeframe: str = "1H") -> Opti
             "take_profit":       tp,
             "risk_reward":       rr,
             "confidence":        confidence,
+            "trend_reversal":    regression_reversal,
         }
 
     if slope_pct < -0.0005:
@@ -279,6 +294,7 @@ def detect_regression_signal(candles: list[dict], timeframe: str = "1H") -> Opti
             "take_profit":       tp,
             "risk_reward":       rr,
             "confidence":        confidence,
+            "trend_reversal":    regression_reversal,
         }
 
     return None

@@ -102,7 +102,10 @@ export default function Dashboard() {
 
         <StatsBar />
         <FilterBar filters={filters} onChange={updateFilters} />
-        <SignalTable filters={filters} />
+        <SignalTable
+          filters={filters}
+          onOrderingChange={(o) => updateFilters({ ordering: o })}
+        />
       </main>
     </div>
   );
