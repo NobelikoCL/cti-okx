@@ -27,6 +27,7 @@ export interface Signal {
   risk_reward: number | null;
   funding_rate: number | null;
   funding_extreme: boolean;
+  trend_reversal: boolean | null;
   confidence: number;
   is_sent_telegram: boolean;
   created_at: string;
@@ -59,6 +60,9 @@ export interface ScannerConfig {
   telegram_breakout: boolean;
   telegram_volume: boolean;
   telegram_regression: boolean;
+  telegram_reversal_filter: boolean;
+  ema_fast: number;
+  ema_slow: number;
 }
 
 export interface SignalFilters {

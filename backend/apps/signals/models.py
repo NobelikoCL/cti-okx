@@ -38,7 +38,8 @@ class Signal(models.Model):
         max_digits=24, decimal_places=8, null=True, blank=True
     )
     risk_reward  = models.FloatField(null=True, blank=True)          # TP/SL ratio
-    funding_rate = models.FloatField(null=True, blank=True)          # funding perpetuo
+    funding_rate    = models.FloatField(null=True, blank=True)       # funding perpetuo
+    trend_reversal  = models.BooleanField(null=True, blank=True)     # EMA crossover detectado
 
     confidence = models.FloatField(default=0.0)
     is_sent_telegram = models.BooleanField(default=False, db_index=True)

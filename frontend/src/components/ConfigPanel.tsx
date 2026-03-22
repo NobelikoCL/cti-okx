@@ -24,14 +24,17 @@ export default function ConfigPanel() {
   const saveMutation = useSaveScannerConfig();
 
   const [form, setForm] = useState<ScannerConfig>({
-    breakout_tf:        "15m",
-    volume_tf:          "15m",
-    regression_tf:      "1H",
-    top_symbols_count:  50,
-    min_confidence:     0,
-    telegram_breakout:  true,
-    telegram_volume:    false,
-    telegram_regression: false,
+    breakout_tf:              "15m",
+    volume_tf:                "15m",
+    regression_tf:            "1H",
+    top_symbols_count:        50,
+    min_confidence:           0,
+    telegram_breakout:        true,
+    telegram_volume:          false,
+    telegram_regression:      false,
+    telegram_reversal_filter: false,
+    ema_fast:                 9,
+    ema_slow:                 21,
   });
   const [saved, setSaved] = useState(false);
 
@@ -178,6 +181,50 @@ export default function ConfigPanel() {
         <p className="text-xs text-gray-500">
           Solo los tipos marcados dispararán alertas Telegram al detectarse
         </p>
+
+        {/* Reversal filter */}
+        <div className="mt-3 p-3 bg-gray-900/60 rounded-lg border border-gray-600 space-y-3">
+          <label className="flex items-center gap-2 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={form.telegram_reversal_filter}
+              onChange={(e) => update("telegram_reversal_filter", e.target.checked)}
+              className="w-4 h-4 accent-blue-500"
+            />
+            <span className="text-sm text-gray-200 font-medium">
+              🔄 Exigir cambio de tendencia (EMA crossover)
+            </span>
+          </label>
+          <p className="text-xs text-gray-500 pl-6">
+            Solo envía ruptura si EMA({form.ema_fast}) cruza EMA({form.ema_slow}) — alcista↔bajista
+          </p>
+          {form.telegram_reversal_filter && (
+            <div className="grid grid-cols-2 gap-3 pl-6">
+              <div className="space-y-1">
+                <label className="text-xs text-gray-400">EMA rápida</label>
+                <input
+                  type="number"
+                  min={2}
+                  max={50}
+                  value={form.ema_fast}
+                  onChange={(e) => update("ema_fast", parseInt(e.target.value) || 9)}
+                  className="bg-gray-800 border border-gray-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-blue-500 w-full"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs text-gray-400">EMA lenta</label>
+                <input
+                  type="number"
+                  min={3}
+                  max={200}
+                  value={form.ema_slow}
+                  onChange={(e) => update("ema_slow", parseInt(e.target.value) || 21)}
+                  className="bg-gray-800 border border-gray-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-blue-500 w-full"
+                />
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="flex items-center justify-between pt-1">

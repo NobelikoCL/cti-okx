@@ -13,7 +13,7 @@ export const MOCK_SIGNALS: Signal[] = [
     volume_ratio: 3.12, rsi: 62.4, atr: 185.40,
     stop_loss: "67154.50000000", take_profit: "67803.30000000",
     risk_reward: 2.00, funding_rate: 0.00032, funding_extreme: false,
-    confidence: 0.87, is_sent_telegram: true, created_at: ago(3),
+    confidence: 0.87, is_sent_telegram: true, trend_reversal: true, created_at: ago(3),
   },
   {
     id: 2, symbol: "ETH-USDT-SWAP",
@@ -24,7 +24,7 @@ export const MOCK_SIGNALS: Signal[] = [
     volume_ratio: null, rsi: 57.1, atr: 42.30,
     stop_loss: "3478.65000000", take_profit: "3626.70000000",
     risk_reward: 1.33, funding_rate: 0.00018, funding_extreme: false,
-    confidence: 0.79, is_sent_telegram: false, created_at: ago(7),
+    confidence: 0.79, is_sent_telegram: false, trend_reversal: false, created_at: ago(7),
   },
   {
     id: 3, symbol: "SOL-USDT-SWAP",

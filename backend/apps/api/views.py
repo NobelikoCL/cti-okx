@@ -181,9 +181,12 @@ def scanner_config(request):
             "regression_tf":      cfg.regression_tf,
             "top_symbols_count":  cfg.top_symbols_count,
             "min_confidence":     cfg.min_confidence,
-            "telegram_breakout":  cfg.telegram_breakout,
-            "telegram_volume":    cfg.telegram_volume,
-            "telegram_regression": cfg.telegram_regression,
+            "telegram_breakout":        cfg.telegram_breakout,
+            "telegram_volume":          cfg.telegram_volume,
+            "telegram_regression":      cfg.telegram_regression,
+            "telegram_reversal_filter": cfg.telegram_reversal_filter,
+            "ema_fast":                 cfg.ema_fast,
+            "ema_slow":                 cfg.ema_slow,
         })
 
     # POST — update fields
@@ -191,6 +194,7 @@ def scanner_config(request):
         "breakout_tf", "volume_tf", "regression_tf",
         "top_symbols_count", "min_confidence",
         "telegram_breakout", "telegram_volume", "telegram_regression",
+        "telegram_reversal_filter", "ema_fast", "ema_slow",
     }
     for field, value in request.data.items():
         if field in allowed:

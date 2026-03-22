@@ -250,6 +250,16 @@ function SignalRow({ signal, onSend, sending }: { signal: Signal; onSend: () => 
                   ? `${(signal.funding_rate * 100).toFixed(4)}%${signal.funding_extreme ? " ⚠️" : ""}`
                   : "—"}
               </DetailCard>
+
+              {/* Trend Reversal */}
+              {signal.trend_reversal != null && (
+                <DetailCard
+                  label="Cambio tendencia"
+                  color={signal.trend_reversal ? "text-emerald-400" : "text-gray-500"}
+                >
+                  {signal.trend_reversal ? "🔄 Sí — EMA cruzó" : "No"}
+                </DetailCard>
+              )}
             </div>
           </td>
         </tr>

@@ -43,6 +43,31 @@ def _volumes(candles: list[dict]) -> np.ndarray:
     return np.array([c["volume"] for c in candles], dtype=float)
 
 
+def _ema(closes: np.ndarray, period: int) -> np.ndarray:
+    """Exponential Moving Average."""
+    k = 2.0 / (period + 1)
+    ema = np.empty_like(closes)
+    ema[0] = closes[0]
+    for i in range(1, len(closes)):
+        ema[i] = closes[i] * k + ema[i - 1] * (1 - k)
+    return ema
+
+
+def _trend_reversal(closes: np.ndarray, fast: int = 9, slow: int = 21) -> bool:
+    """
+    Returns True if EMA(fast) crossed EMA(slow) on the last candle.
+    Bullish reversal: fast was below slow, now above (bajista → alcista).
+    Bearish reversal: fast was above slow, now below (alcista → bajista).
+    """
+    if len(closes) < slow + 2:
+        return False
+    ema_f = _ema(closes, fast)
+    ema_s = _ema(closes, slow)
+    curr_above = ema_f[-1] > ema_s[-1]
+    prev_above = ema_f[-2] > ema_s[-2]
+    return curr_above != prev_above
+
+
 def _rsi(closes: np.ndarray, period: int = 14) -> float:
     """RSI(period) using simple moving average of gains/losses. Pure numpy."""
     if len(closes) < period + 1:
@@ -89,7 +114,7 @@ def _sl_tp(price: float, atr: float, direction: str) -> tuple[float, float]:
 
 # ── 1. M15 Breakout ───────────────────────────────────────────────────────────
 
-def detect_breakout(candles: list[dict], timeframe: str = "15m") -> Optional[dict]:
+def detect_breakout(candles: list[dict], timeframe: str = "15m", ema_fast: int = 9, ema_slow: int = 21) -> Optional[dict]:
     """
     Requiere >= 20 velas M15 confirmadas (oldest first).
     Rango: máximo high y mínimo low de las primeras 19 velas.
@@ -122,6 +147,7 @@ def detect_breakout(candles: list[dict], timeframe: str = "15m") -> Optional[dic
     closes = _closes(candles)
     rsi_val = _rsi(closes)
     atr_val = _atr(candles)
+    reversal = _trend_reversal(closes, fast=ema_fast, slow=ema_slow)
 
     if cur_close > range_high:
         # 2.3 — No BULL si sobrecomprado
@@ -150,6 +176,7 @@ def detect_breakout(candles: list[dict], timeframe: str = "15m") -> Optional[dic
             "take_profit":    tp,
             "risk_reward":    rr,
             "confidence":     round(confidence, 4),
+            "trend_reversal": reversal,
         }
 
     if cur_close < range_low:
@@ -179,6 +206,7 @@ def detect_breakout(candles: list[dict], timeframe: str = "15m") -> Optional[dic
             "take_profit":    tp,
             "risk_reward":    rr,
             "confidence":     round(confidence, 4),
+            "trend_reversal": reversal,
         }
 
     return None
@@ -322,13 +350,15 @@ def analyze_symbol(symbol: str) -> list[dict]:
     breakout_tf   = cfg.breakout_tf
     volume_tf     = cfg.volume_tf
     regression_tf = cfg.regression_tf
+    ema_fast      = cfg.ema_fast
+    ema_slow      = cfg.ema_slow
 
     results: list[dict] = []
 
     # Breakout — uses configured TF (default 15m)
     bo_candles = get_candles(symbol, breakout_tf, limit=35)
     if bo_candles and len(bo_candles) >= 20:
-        sig = detect_breakout(bo_candles, timeframe=breakout_tf)
+        sig = detect_breakout(bo_candles, timeframe=breakout_tf, ema_fast=ema_fast, ema_slow=ema_slow)
         if sig:
             sig["symbol"] = symbol
             results.append(sig)

@@ -43,6 +43,7 @@ def _save_signal(data: dict):
         take_profit       = data.get("take_profit"),
         risk_reward       = data.get("risk_reward"),
         funding_rate      = data.get("funding_rate"),
+        trend_reversal    = data.get("trend_reversal"),
         confidence        = data.get("confidence", 0.0),
     )
     logger.info(
@@ -99,7 +100,7 @@ def scan_markets(self):
                 signal = _save_signal(data)
                 total_signals += 1
 
-                if cfg.should_telegram(signal.signal_type):
+                if cfg.should_telegram(signal.signal_type, trend_reversal=bool(signal.trend_reversal)):
                     from apps.alerts.tasks import send_telegram_alert
                     send_telegram_alert.apply_async(
                         args=[signal.id],

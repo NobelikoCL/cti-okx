@@ -122,6 +122,9 @@ const DEFAULT_SCANNER_CONFIG: ScannerConfig = {
   telegram_breakout: true,
   telegram_volume: false,
   telegram_regression: false,
+  telegram_reversal_filter: false,
+  ema_fast: 9,
+  ema_slow: 21,
 };
 
 export async function fetchScannerConfig(): Promise<ScannerConfig> {

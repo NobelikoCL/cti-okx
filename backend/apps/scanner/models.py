@@ -29,9 +29,19 @@ class ScannerConfig(models.Model):
     telegram_volume     = models.BooleanField(default=False)
     telegram_regression = models.BooleanField(default=False)
 
-    def should_telegram(self, signal_type: str) -> bool:
+    # Trend reversal filter — only send breakout if EMA crossover detected
+    telegram_reversal_filter = models.BooleanField(default=False)
+    ema_fast = models.PositiveIntegerField(default=9)
+    ema_slow = models.PositiveIntegerField(default=21)
+
+    def should_telegram(self, signal_type: str, trend_reversal: bool = False) -> bool:
         if signal_type in ("BREAKOUT_BULL", "BREAKOUT_BEAR"):
-            return self.telegram_breakout
+            if not self.telegram_breakout:
+                return False
+            # If reversal filter is ON, only send when EMA crossover detected
+            if self.telegram_reversal_filter and not trend_reversal:
+                return False
+            return True
         if signal_type == "VOLUME_ANOMALY":
             return self.telegram_volume
         if signal_type in ("REGRESSION_BULL", "REGRESSION_BEAR"):

@@ -29,6 +29,7 @@ class SignalSerializer(serializers.ModelSerializer):
             "risk_reward",
             "funding_rate",
             "funding_extreme",
+            "trend_reversal",
             "confidence",
             "is_sent_telegram",
             "created_at",
