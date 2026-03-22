@@ -157,7 +157,9 @@ def scan_single_symbol(self, symbol: str):
     """Trigger analysis for a single symbol (used for manual refresh)."""
     from apps.scanner.analysis import analyze_symbol
     from apps.scanner.okx_client import get_funding_rate
+    from apps.scanner.models import ScannerConfig
 
+    cfg = ScannerConfig.get()
     funding = get_funding_rate(symbol)
     signals = analyze_symbol(symbol)
     saved_ids = []
@@ -166,6 +168,11 @@ def scan_single_symbol(self, symbol: str):
             data["funding_rate"] = funding
             sig = _save_signal(data)
             saved_ids.append(sig.id)
-            from apps.alerts.tasks import send_telegram_alert
-            send_telegram_alert.apply_async(args=[sig.id], queue="alerts")
+            if (
+                cfg.should_telegram(sig.signal_type, trend_reversal=bool(sig.trend_reversal))
+                and sig.confidence >= cfg.telegram_min_confidence_tg
+                and _telegram_cooldown_ok(sig.symbol, sig.signal_type, cfg.telegram_cooldown_minutes)
+            ):
+                from apps.alerts.tasks import send_telegram_alert
+                send_telegram_alert.apply_async(args=[sig.id], queue="alerts")
     return saved_ids
