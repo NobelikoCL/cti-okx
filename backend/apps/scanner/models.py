@@ -1,0 +1,38 @@
+from django.db import models
+
+
+TIMEFRAME_CHOICES = [
+    ("1m",  "1 minuto"),
+    ("3m",  "3 minutos"),
+    ("5m",  "5 minutos"),
+    ("15m", "15 minutos"),
+    ("30m", "30 minutos"),
+    ("1H",  "1 hora"),
+    ("2H",  "2 horas"),
+    ("4H",  "4 horas"),
+    ("6H",  "6 horas"),
+    ("12H", "12 horas"),
+    ("1D",  "1 día"),
+]
+
+
+class ScannerConfig(models.Model):
+    """Singleton model — scanner configuration editable from the UI."""
+    breakout_tf       = models.CharField(max_length=10, choices=TIMEFRAME_CHOICES, default="15m")
+    volume_tf         = models.CharField(max_length=10, choices=TIMEFRAME_CHOICES, default="15m")
+    regression_tf     = models.CharField(max_length=10, choices=TIMEFRAME_CHOICES, default="1H")
+    top_symbols_count = models.PositiveIntegerField(default=50)
+    min_confidence    = models.FloatField(default=0.0)
+
+    class Meta:
+        verbose_name = "Scanner Config"
+
+    @classmethod
+    def get(cls) -> "ScannerConfig":
+        obj = cls.objects.first()
+        if obj is None:
+            obj = cls.objects.create()
+        return obj
+
+    def __str__(self):
+        return f"ScannerConfig(breakout={self.breakout_tf}, vol={self.volume_tf}, reg={self.regression_tf})"

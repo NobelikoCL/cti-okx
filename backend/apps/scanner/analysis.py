@@ -89,7 +89,7 @@ def _sl_tp(price: float, atr: float, direction: str) -> tuple[float, float]:
 
 # ── 1. M15 Breakout ───────────────────────────────────────────────────────────
 
-def detect_breakout(candles: list[dict]) -> Optional[dict]:
+def detect_breakout(candles: list[dict], timeframe: str = "15m") -> Optional[dict]:
     """
     Requiere >= 20 velas M15 confirmadas (oldest first).
     Rango: máximo high y mínimo low de las primeras 19 velas.
@@ -140,7 +140,7 @@ def detect_breakout(candles: list[dict]) -> Optional[dict]:
         return {
             "signal_type":    "BREAKOUT_BULL",
             "direction":      "LONG",
-            "timeframe":      "15m",
+            "timeframe":      timeframe,
             "price":          cur_close,
             "breakout_level": range_high,
             "volume_ratio":   vol_ratio,
@@ -169,7 +169,7 @@ def detect_breakout(candles: list[dict]) -> Optional[dict]:
         return {
             "signal_type":    "BREAKOUT_BEAR",
             "direction":      "SHORT",
-            "timeframe":      "15m",
+            "timeframe":      timeframe,
             "price":          cur_close,
             "breakout_level": range_low,
             "volume_ratio":   vol_ratio,
@@ -186,7 +186,7 @@ def detect_breakout(candles: list[dict]) -> Optional[dict]:
 
 # ── 2. 1H LSRL Regression ─────────────────────────────────────────────────────
 
-def detect_regression_signal(candles: list[dict]) -> Optional[dict]:
+def detect_regression_signal(candles: list[dict], timeframe: str = "1H") -> Optional[dict]:
     """
     LSRL sobre los cierres de velas 1H (>=20 velas recomendado).
     Usa scipy.stats.linregress para obtener p-value y R².
@@ -223,7 +223,7 @@ def detect_regression_signal(candles: list[dict]) -> Optional[dict]:
         return {
             "signal_type":       "REGRESSION_BULL",
             "direction":         "LONG",
-            "timeframe":         "1H",
+            "timeframe":         timeframe,
             "price":             price,
             "regression_slope":  slope_pct,
             "regression_r2":     r2,
@@ -241,7 +241,7 @@ def detect_regression_signal(candles: list[dict]) -> Optional[dict]:
         return {
             "signal_type":       "REGRESSION_BEAR",
             "direction":         "SHORT",
-            "timeframe":         "1H",
+            "timeframe":         timeframe,
             "price":             price,
             "regression_slope":  slope_pct,
             "regression_r2":     r2,
@@ -258,7 +258,7 @@ def detect_regression_signal(candles: list[dict]) -> Optional[dict]:
 
 # ── 3. Volume Anomaly ─────────────────────────────────────────────────────────
 
-def detect_volume_anomaly(candles: list[dict]) -> Optional[dict]:
+def detect_volume_anomaly(candles: list[dict], timeframe: str = "15m") -> Optional[dict]:
     """
     Z-score de volumen: (vol_actual - media) / std_dev.
     Umbral: z >= VOLUME_ZSCORE_MIN (default 2.0 = percentil 97.7%).
@@ -295,7 +295,7 @@ def detect_volume_anomaly(candles: list[dict]) -> Optional[dict]:
     return {
         "signal_type":  "VOLUME_ANOMALY",
         "direction":    "NEUTRAL",
-        "timeframe":    "15m",
+        "timeframe":    timeframe,
         "price":        cur_close,
         "volume_ratio": round(vol_ratio, 4),
         "rsi":          rsi_val,
@@ -311,31 +311,44 @@ def detect_volume_anomaly(candles: list[dict]) -> Optional[dict]:
 
 def analyze_symbol(symbol: str) -> list[dict]:
     """
-    Runs all three analyses for a symbol.
+    Runs all three analyses for a symbol using timeframes from ScannerConfig.
     Returns a list of signal dicts (may be empty).
     funding_rate is injected by the caller (tasks.py).
     """
     from apps.scanner.okx_client import get_candles
+    from apps.scanner.models import ScannerConfig
+
+    cfg = ScannerConfig.get()
+    breakout_tf   = cfg.breakout_tf
+    volume_tf     = cfg.volume_tf
+    regression_tf = cfg.regression_tf
 
     results: list[dict] = []
 
-    # M15: request 32 candles (30 confirmed + buffer for confirm filtering)
-    m15 = get_candles(symbol, "15m", limit=35)
-    if m15 and len(m15) >= 20:
-        sig = detect_breakout(m15)
+    # Breakout — uses configured TF (default 15m)
+    bo_candles = get_candles(symbol, breakout_tf, limit=35)
+    if bo_candles and len(bo_candles) >= 20:
+        sig = detect_breakout(bo_candles, timeframe=breakout_tf)
         if sig:
             sig["symbol"] = symbol
             results.append(sig)
 
-        vol_sig = detect_volume_anomaly(m15)
+    # Volume anomaly — uses its own configured TF (may differ from breakout)
+    if volume_tf != breakout_tf:
+        vol_candles = get_candles(symbol, volume_tf, limit=35)
+    else:
+        vol_candles = bo_candles
+
+    if vol_candles and len(vol_candles) >= 10:
+        vol_sig = detect_volume_anomaly(vol_candles, timeframe=volume_tf)
         if vol_sig:
             vol_sig["symbol"] = symbol
             results.append(vol_sig)
 
-    # 1H: 55 candles for regression (ensures 50 confirmed after filtering)
-    h1 = get_candles(symbol, "1H", limit=55)
-    if h1 and len(h1) >= 10:
-        sig = detect_regression_signal(h1)
+    # Regression — uses configured TF (default 1H)
+    reg_candles = get_candles(symbol, regression_tf, limit=55)
+    if reg_candles and len(reg_candles) >= 10:
+        sig = detect_regression_signal(reg_candles, timeframe=regression_tf)
         if sig:
             sig["symbol"] = symbol
             results.append(sig)

@@ -16,6 +16,9 @@ urlpatterns = [
     path("telegram/configure/", views.telegram_configure, name="telegram-configure"),
     path("telegram/test/", views.telegram_test, name="telegram-test"),
 
+    # Scanner config
+    path("config/scanner/", views.scanner_config, name="scanner-config"),
+
     # Instruments
     path("instruments/", views.instruments_list, name="instruments-list"),
 ]

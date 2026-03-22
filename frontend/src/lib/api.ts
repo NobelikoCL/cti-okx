@@ -1,5 +1,5 @@
 import axios from "axios";
-import type { Signal, SignalStats, PaginatedResponse, TelegramStatus, SignalFilters } from "../types";
+import type { Signal, SignalStats, PaginatedResponse, TelegramStatus, SignalFilters, ScannerConfig } from "../types";
 import { MOCK_SIGNALS, MOCK_STATS, mockSignalsPage } from "./mock";
 
 const client = axios.create({
@@ -106,6 +106,34 @@ export async function testTelegram(token?: string, chatId?: string): Promise<boo
   if (chatId) payload.chat_id = chatId;
   try {
     const { data } = await client.post<{ success: boolean }>("/telegram/test/", payload);
+    if (isValidJson(data)) return (data as { success: boolean }).success;
+  } catch {
+    // fall through
+  }
+  return false;
+}
+
+const DEFAULT_SCANNER_CONFIG: ScannerConfig = {
+  breakout_tf: "15m",
+  volume_tf: "15m",
+  regression_tf: "1H",
+  top_symbols_count: 50,
+  min_confidence: 0,
+};
+
+export async function fetchScannerConfig(): Promise<ScannerConfig> {
+  try {
+    const { data } = await client.get<ScannerConfig>("/config/scanner/");
+    if (isValidJson(data)) return data;
+  } catch {
+    // fall through
+  }
+  return DEFAULT_SCANNER_CONFIG;
+}
+
+export async function saveScannerConfig(cfg: Partial<ScannerConfig>): Promise<boolean> {
+  try {
+    const { data } = await client.post<{ success: boolean }>("/config/scanner/", cfg);
     if (isValidJson(data)) return (data as { success: boolean }).success;
   } catch {
     // fall through

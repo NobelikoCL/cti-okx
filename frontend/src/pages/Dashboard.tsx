@@ -4,6 +4,7 @@ import StatsBar from "../components/StatsBar";
 import FilterBar from "../components/FilterBar";
 import SignalTable from "../components/SignalTable";
 import TelegramPanel from "../components/TelegramPanel";
+import ConfigPanel from "../components/ConfigPanel";
 import type { SignalFilters } from "../types";
 
 const DEFAULT_FILTERS: SignalFilters = {
@@ -25,7 +26,8 @@ function useRecentCount(minutes = 15) {
 
 export default function Dashboard() {
   const [filters, setFilters] = useState<SignalFilters>(DEFAULT_FILTERS);
-  const [showTelegram, setShowTelegram]   = useState(false);
+  const [showTelegram, setShowTelegram] = useState(false);
+  const [showConfig, setShowConfig]     = useState(false);
   const scanMutation = useTriggerScan();
   const recentCount  = useRecentCount(15);
 
@@ -57,7 +59,13 @@ export default function Dashboard() {
 
           <div className="ml-auto flex items-center gap-3">
             <button
-              onClick={() => setShowTelegram((v) => !v)}
+              onClick={() => { setShowConfig((v) => !v); setShowTelegram(false); }}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-lg text-sm transition-colors"
+            >
+              ⚙️ Config
+            </button>
+            <button
+              onClick={() => { setShowTelegram((v) => !v); setShowConfig(false); }}
               className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-lg text-sm transition-colors"
             >
               📱 Telegram
@@ -79,6 +87,8 @@ export default function Dashboard() {
             ✓ Escaneo iniciado — las señales aparecerán en ~30 segundos
           </div>
         )}
+
+        {showConfig && <ConfigPanel />}
 
         {showTelegram && (
           <div className="max-w-md">

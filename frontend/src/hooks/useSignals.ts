@@ -8,6 +8,8 @@ import {
   fetchTelegramStatus,
   testTelegram,
   configureTelegram,
+  fetchScannerConfig,
+  saveScannerConfig,
 } from "../lib/api";
 import type { SignalFilters } from "../types";
 
@@ -74,5 +76,20 @@ export function useConfigureTelegram() {
     mutationFn: ({ token, chatId }: { token: string; chatId: string }) =>
       configureTelegram(token, chatId),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["telegram-status"] }),
+  });
+}
+
+export function useScannerConfig() {
+  return useQuery({
+    queryKey: ["scanner-config"],
+    queryFn: fetchScannerConfig,
+  });
+}
+
+export function useSaveScannerConfig() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: saveScannerConfig,
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["scanner-config"] }),
   });
 }

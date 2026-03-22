@@ -50,6 +50,14 @@ export interface TelegramStatus {
   chat_id: string;
 }
 
+export interface ScannerConfig {
+  breakout_tf: string;
+  volume_tf: string;
+  regression_tf: string;
+  top_symbols_count: number;
+  min_confidence: number;
+}
+
 export interface SignalFilters {
   search: string;
   signal_type: SignalType | "";

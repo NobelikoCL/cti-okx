@@ -165,6 +165,33 @@ def telegram_test(request):
     return Response({"success": ok})
 
 
+@api_view(["GET", "POST"])
+def scanner_config(request):
+    """
+    GET  /api/config/scanner/ — returns current scanner config
+    POST /api/config/scanner/ — updates scanner config
+    """
+    from apps.scanner.models import ScannerConfig
+    cfg = ScannerConfig.get()
+
+    if request.method == "GET":
+        return Response({
+            "breakout_tf":       cfg.breakout_tf,
+            "volume_tf":         cfg.volume_tf,
+            "regression_tf":     cfg.regression_tf,
+            "top_symbols_count": cfg.top_symbols_count,
+            "min_confidence":    cfg.min_confidence,
+        })
+
+    # POST — update fields
+    allowed = {"breakout_tf", "volume_tf", "regression_tf", "top_symbols_count", "min_confidence"}
+    for field, value in request.data.items():
+        if field in allowed:
+            setattr(cfg, field, value)
+    cfg.save()
+    return Response({"success": True})
+
+
 @api_view(["GET"])
 def instruments_list(request):
     """
