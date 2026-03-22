@@ -35,7 +35,7 @@ export const MOCK_SIGNALS: Signal[] = [
     volume_ratio: 4.85, rsi: 51.8, atr: 2.14,
     stop_loss: "175.22000000", take_profit: "182.71000000",
     risk_reward: 1.33, funding_rate: 0.00012, funding_extreme: false,
-    confidence: 0.93, is_sent_telegram: false, created_at: ago(11),
+    confidence: 0.93, is_sent_telegram: false, trend_reversal: null, created_at: ago(11),
   },
   {
     id: 4, symbol: "XRP-USDT-SWAP",
@@ -46,7 +46,7 @@ export const MOCK_SIGNALS: Signal[] = [
     volume_ratio: 2.34, rsi: 38.2, atr: 0.00820,
     stop_loss: "0.63050000", take_profit: "0.60180000",
     risk_reward: 1.33, funding_rate: -0.00125, funding_extreme: true,
-    confidence: 0.64, is_sent_telegram: true, created_at: ago(18),
+    confidence: 0.64, is_sent_telegram: true, trend_reversal: true, created_at: ago(18),
   },
   {
     id: 5, symbol: "DOGE-USDT-SWAP",
@@ -57,7 +57,7 @@ export const MOCK_SIGNALS: Signal[] = [
     volume_ratio: null, rsi: 44.6, atr: 0.00195,
     stop_loss: "0.16633000", take_profit: "0.15950000",
     risk_reward: 1.33, funding_rate: 0.00008, funding_extreme: false,
-    confidence: 0.71, is_sent_telegram: false, created_at: ago(24),
+    confidence: 0.71, is_sent_telegram: false, trend_reversal: null, created_at: ago(24),
   },
   {
     id: 6, symbol: "AVAX-USDT-SWAP",
@@ -68,7 +68,7 @@ export const MOCK_SIGNALS: Signal[] = [
     volume_ratio: 2.71, rsi: 66.3, atr: 0.48,
     stop_loss: "38.00000000", take_profit: "39.68000000",
     risk_reward: 1.33, funding_rate: 0.00021, funding_extreme: false,
-    confidence: 0.75, is_sent_telegram: false, created_at: ago(31),
+    confidence: 0.75, is_sent_telegram: false, trend_reversal: false, created_at: ago(31),
   },
   {
     id: 7, symbol: "LINK-USDT-SWAP",
@@ -79,7 +79,7 @@ export const MOCK_SIGNALS: Signal[] = [
     volume_ratio: 5.22, rsi: 48.9, atr: 0.172,
     stop_loss: "14.02200000", take_profit: "14.62400000",
     risk_reward: 1.33, funding_rate: 0.00115, funding_extreme: true,
-    confidence: 0.96, is_sent_telegram: true, created_at: ago(45),
+    confidence: 0.96, is_sent_telegram: true, trend_reversal: null, created_at: ago(45),
   },
   {
     id: 8, symbol: "MATIC-USDT-SWAP",
@@ -90,7 +90,7 @@ export const MOCK_SIGNALS: Signal[] = [
     volume_ratio: null, rsi: 53.7, atr: 0.01085,
     stop_loss: "0.89573000", take_profit: "0.93370000",
     risk_reward: 1.33, funding_rate: 0.00006, funding_extreme: false,
-    confidence: 0.81, is_sent_telegram: false, created_at: ago(58),
+    confidence: 0.81, is_sent_telegram: false, trend_reversal: null, created_at: ago(58),
   },
   {
     id: 9, symbol: "ARB-USDT-SWAP",
@@ -101,7 +101,7 @@ export const MOCK_SIGNALS: Signal[] = [
     volume_ratio: 1.98, rsi: 41.5, atr: 0.01350,
     stop_loss: "1.11425000", take_profit: "1.06700000",
     risk_reward: 1.33, funding_rate: -0.00009, funding_extreme: false,
-    confidence: 0.52, is_sent_telegram: false, created_at: ago(72),
+    confidence: 0.52, is_sent_telegram: false, trend_reversal: false, created_at: ago(72),
   },
   {
     id: 10, symbol: "OP-USDT-SWAP",
@@ -112,7 +112,7 @@ export const MOCK_SIGNALS: Signal[] = [
     volume_ratio: 3.67, rsi: 55.2, atr: 0.02960,
     stop_loss: "2.43660000", take_profit: "2.54020000",
     risk_reward: 1.33, funding_rate: 0.00031, funding_extreme: false,
-    confidence: 0.88, is_sent_telegram: true, created_at: ago(90),
+    confidence: 0.88, is_sent_telegram: true, trend_reversal: null, created_at: ago(90),
   },
 ];
 
