@@ -54,13 +54,24 @@ def _build_message(signal) -> str:
     return "\n".join(lines)
 
 
+def _get_credentials():
+    """Return (token, chat_id) — DB config takes priority over settings."""
+    from apps.alerts.models import BotConfig
+    cfg = BotConfig.get()
+    if cfg and cfg.token and cfg.chat_id:
+        return cfg.token, cfg.chat_id
+    return (
+        getattr(settings, "TELEGRAM_BOT_TOKEN", ""),
+        getattr(settings, "TELEGRAM_CHAT_ID", ""),
+    )
+
+
 def send_signal(signal) -> bool:
     """
     Send a signal notification via Telegram Bot API (synchronous HTTP).
     Returns True on success.
     """
-    token = settings.TELEGRAM_BOT_TOKEN
-    chat_id = settings.TELEGRAM_CHAT_ID
+    token, chat_id = _get_credentials()
 
     if not token or not chat_id:
         logger.warning("Telegram not configured, skipping alert for signal %s", signal.id)

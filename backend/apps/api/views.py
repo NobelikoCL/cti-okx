@@ -112,10 +112,10 @@ def trigger_scan(request):
 def telegram_status(request):
     """
     GET /api/telegram/status/
-    Returns whether Telegram is configured.
+    Returns whether Telegram is configured (DB takes priority over settings).
     """
-    token = getattr(settings, "TELEGRAM_BOT_TOKEN", "")
-    chat_id = getattr(settings, "TELEGRAM_CHAT_ID", "")
+    from apps.alerts.telegram import _get_credentials
+    token, chat_id = _get_credentials()
     configured = bool(token and chat_id)
     return Response({
         "configured": configured,
@@ -124,13 +124,35 @@ def telegram_status(request):
 
 
 @api_view(["POST"])
+def telegram_configure(request):
+    """
+    POST /api/telegram/configure/
+    Save bot token and chat_id to the database.
+    """
+    token = request.data.get("token", "").strip()
+    chat_id = request.data.get("chat_id", "").strip()
+
+    if not token or not chat_id:
+        return Response(
+            {"success": False, "error": "Token y chat_id son requeridos"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    from apps.alerts.models import BotConfig
+    BotConfig.save_credentials(token, chat_id)
+    return Response({"success": True})
+
+
+@api_view(["POST"])
 def telegram_test(request):
     """
     POST /api/telegram/test/
     Send a test message to Telegram using provided or configured credentials.
     """
-    token = request.data.get("token") or getattr(settings, "TELEGRAM_BOT_TOKEN", "")
-    chat_id = request.data.get("chat_id") or getattr(settings, "TELEGRAM_CHAT_ID", "")
+    from apps.alerts.telegram import _get_credentials
+    saved_token, saved_chat_id = _get_credentials()
+    token = request.data.get("token") or saved_token
+    chat_id = request.data.get("chat_id") or saved_chat_id
 
     if not token or not chat_id:
         return Response(

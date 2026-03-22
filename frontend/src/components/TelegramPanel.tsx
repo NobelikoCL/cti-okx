@@ -1,19 +1,28 @@
 import { useState } from "react";
-import { useTelegramStatus, useTestTelegram, useSendAllUnsent } from "../hooks/useSignals";
+import { useTelegramStatus, useTestTelegram, useSendAllUnsent, useConfigureTelegram } from "../hooks/useSignals";
 
 export default function TelegramPanel() {
   const { data: status } = useTelegramStatus();
   const testMutation = useTestTelegram();
+  const saveMutation = useConfigureTelegram();
   const sendAllMutation = useSendAllUnsent();
 
   const [token, setToken] = useState("");
   const [chatId, setChatId] = useState("");
   const [testResult, setTestResult] = useState<boolean | null>(null);
+  const [saveResult, setSaveResult] = useState<boolean | null>(null);
 
   const handleTest = async () => {
     setTestResult(null);
     const ok = await testMutation.mutateAsync({ token: token || undefined, chatId: chatId || undefined });
     setTestResult(ok);
+  };
+
+  const handleSave = async () => {
+    setSaveResult(null);
+    const ok = await saveMutation.mutateAsync({ token, chatId });
+    setSaveResult(ok);
+    if (ok) { setToken(""); setChatId(""); }
   };
 
   return (
@@ -62,17 +71,31 @@ export default function TelegramPanel() {
           onChange={(e) => setChatId(e.target.value)}
           className="w-full bg-gray-900 border border-gray-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-blue-500"
         />
-        <button
-          onClick={handleTest}
-          disabled={testMutation.isPending}
-          className="w-full bg-blue-700 hover:bg-blue-600 disabled:opacity-50 rounded-lg py-2 text-sm font-medium transition-colors"
-        >
-          {testMutation.isPending ? "Enviando…" : "Enviar mensaje de prueba"}
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={handleTest}
+            disabled={testMutation.isPending}
+            className="flex-1 bg-blue-700 hover:bg-blue-600 disabled:opacity-50 rounded-lg py-2 text-sm font-medium transition-colors"
+          >
+            {testMutation.isPending ? "Enviando…" : "Probar"}
+          </button>
+          <button
+            onClick={handleSave}
+            disabled={saveMutation.isPending || !token || !chatId}
+            className="flex-1 bg-emerald-700 hover:bg-emerald-600 disabled:opacity-50 rounded-lg py-2 text-sm font-medium transition-colors"
+          >
+            {saveMutation.isPending ? "Guardando…" : "💾 Guardar"}
+          </button>
+        </div>
 
         {testResult !== null && (
           <p className={`text-sm text-center font-medium ${testResult ? "text-emerald-400" : "text-red-400"}`}>
             {testResult ? "✓ Mensaje enviado correctamente" : "✗ Error al enviar — verifica las credenciales"}
+          </p>
+        )}
+        {saveResult !== null && (
+          <p className={`text-sm text-center font-medium ${saveResult ? "text-emerald-400" : "text-red-400"}`}>
+            {saveResult ? "✓ Credenciales guardadas" : "✗ Error al guardar — backend no disponible"}
           </p>
         )}
       </div>

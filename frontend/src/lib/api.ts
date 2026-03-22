@@ -90,6 +90,16 @@ export async function fetchTelegramStatus(): Promise<TelegramStatus> {
   return { configured: false, chat_id: "" };
 }
 
+export async function configureTelegram(token: string, chatId: string): Promise<boolean> {
+  try {
+    const { data } = await client.post<{ success: boolean }>("/telegram/configure/", { token, chat_id: chatId });
+    if (isValidJson(data)) return (data as { success: boolean }).success;
+  } catch {
+    // fall through
+  }
+  return false;
+}
+
 export async function testTelegram(token?: string, chatId?: string): Promise<boolean> {
   const payload: Record<string, string> = {};
   if (token) payload.token = token;

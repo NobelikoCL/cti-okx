@@ -7,6 +7,7 @@ import {
   triggerScan,
   fetchTelegramStatus,
   testTelegram,
+  configureTelegram,
 } from "../lib/api";
 import type { SignalFilters } from "../types";
 
@@ -64,5 +65,14 @@ export function useTestTelegram() {
   return useMutation({
     mutationFn: ({ token, chatId }: { token?: string; chatId?: string }) =>
       testTelegram(token, chatId),
+  });
+}
+
+export function useConfigureTelegram() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ token, chatId }: { token: string; chatId: string }) =>
+      configureTelegram(token, chatId),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["telegram-status"] }),
   });
 }

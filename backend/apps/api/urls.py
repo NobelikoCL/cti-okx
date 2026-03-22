@@ -13,6 +13,7 @@ urlpatterns = [
 
     # Telegram
     path("telegram/status/", views.telegram_status, name="telegram-status"),
+    path("telegram/configure/", views.telegram_configure, name="telegram-configure"),
     path("telegram/test/", views.telegram_test, name="telegram-test"),
 
     # Instruments
