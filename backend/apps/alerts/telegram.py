@@ -29,9 +29,11 @@ LABEL = {
 def _build_message(signal) -> str:
     emoji = DIRECTION_EMOJI.get(signal.signal_type, "🔔")
     label = LABEL.get(signal.signal_type, signal.signal_type)
+    slug = signal.symbol.lower()
+    okx_url = f"https://www.okx.com/trade-swap/{slug}"
     lines = [
         f"{emoji} <b>CTIS OKX Signal</b>",
-        f"📊 <b>{signal.symbol}</b>",
+        f"📊 <b>{signal.symbol}</b> — <a href=\"{okx_url}\">Ver en OKX</a>",
         f"🏷 Tipo: {label}",
         f"⏱ Timeframe: {signal.timeframe}",
         f"💵 Precio: <code>{float(signal.price):.6f}</code>",
