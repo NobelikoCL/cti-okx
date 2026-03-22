@@ -125,7 +125,7 @@ export default function ConfigPanel() {
           <input
             type="number"
             min={10}
-            max={200}
+            max={300}
             value={form.top_symbols_count}
             onChange={(e) => update("top_symbols_count", parseInt(e.target.value) || 50)}
             className="bg-gray-900 border border-gray-600 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-blue-500 w-full"

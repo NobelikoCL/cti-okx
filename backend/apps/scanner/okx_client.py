@@ -32,8 +32,6 @@ def get_top_symbols_by_volume(n: int = 50) -> list[str]:
     Return the top-N USDT-margined perpetual swaps ranked by 24h quote volume.
     Uses the market tickers endpoint (no auth required). Cached 15 minutes.
     """
-    from django.conf import settings as _settings
-    n = getattr(_settings, "TOP_SYMBOLS_COUNT", n)
     cache_key = f"okx:top_symbols_vol:{n}"
     cached = cache.get(cache_key)
     if cached is not None:

@@ -72,7 +72,7 @@ def scan_markets(self):
 
     cfg = ScannerConfig.get()
     logger.info("scan_markets started")
-    instruments = get_top_symbols_by_volume()
+    instruments = get_top_symbols_by_volume(cfg.top_symbols_count)
     if not instruments:
         logger.warning("No instruments fetched, aborting scan")
         return
