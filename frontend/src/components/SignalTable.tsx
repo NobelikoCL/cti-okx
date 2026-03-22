@@ -119,8 +119,17 @@ function SignalRow({ signal, onSend, sending }: { signal: Signal; onSend: () => 
         <td className="px-3 py-3 text-gray-500 text-xs">
           {expanded ? "▲" : "▼"}
         </td>
-        <td className="px-4 py-3 font-mono font-semibold text-white">
-          {signal.symbol}
+        <td className="px-4 py-3 font-mono font-semibold">
+          <a
+            href={`https://www.okx.com/trade-swap/${signal.symbol.toLowerCase().replace(/-/g, "-")}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            className="text-blue-400 hover:text-blue-300 hover:underline transition-colors"
+            title="Ver en OKX"
+          >
+            {signal.symbol}
+          </a>
           {signal.funding_extreme && (
             <span title={`Funding extremo: ${((signal.funding_rate ?? 0) * 100).toFixed(3)}%`}
                   className="ml-1 text-amber-400 text-xs">⚠️</span>
