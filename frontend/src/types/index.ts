@@ -19,6 +19,14 @@ export interface Signal {
   regression_slope: number | null;
   regression_r2: number | null;
   volume_ratio: number | null;
+  // Quantitative enrichment (Tier 3)
+  rsi: number | null;
+  atr: number | null;
+  stop_loss: string | null;
+  take_profit: string | null;
+  risk_reward: number | null;
+  funding_rate: number | null;
+  funding_extreme: boolean;
   confidence: number;
   is_sent_telegram: boolean;
   created_at: string;
@@ -45,6 +53,7 @@ export interface TelegramStatus {
 export interface SignalFilters {
   search: string;
   signal_type: SignalType | "";
+  direction: Direction | "";
   timeframe: string;
   min_confidence: number;
   ordering: string;

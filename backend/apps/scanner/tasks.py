@@ -11,7 +11,6 @@ from django.utils import timezone
 
 logger = logging.getLogger(__name__)
 
-MAX_SIGNALS_PER_ASSET: int = getattr(settings, "MAX_SIGNALS_PER_ASSET", 3)
 DEDUP_WINDOW_MINUTES: int = 30  # ignore duplicate signal within this window
 
 
@@ -30,17 +29,29 @@ def _is_duplicate(symbol: str, signal_type: str, timeframe: str) -> bool:
 def _save_signal(data: dict):
     from apps.signals.models import Signal
     signal = Signal.objects.create(
-        symbol=data["symbol"],
-        signal_type=data["signal_type"],
-        timeframe=data.get("timeframe", ""),
-        price=data["price"],
-        breakout_level=data.get("breakout_level"),
-        regression_slope=data.get("regression_slope"),
-        regression_r2=data.get("regression_r2"),
-        volume_ratio=data.get("volume_ratio"),
-        confidence=data.get("confidence", 0.0),
+        symbol        = data["symbol"],
+        signal_type   = data["signal_type"],
+        timeframe     = data.get("timeframe", ""),
+        price         = data["price"],
+        breakout_level    = data.get("breakout_level"),
+        regression_slope  = data.get("regression_slope"),
+        regression_r2     = data.get("regression_r2"),
+        volume_ratio      = data.get("volume_ratio"),
+        rsi               = data.get("rsi"),
+        atr               = data.get("atr"),
+        stop_loss         = data.get("stop_loss"),
+        take_profit       = data.get("take_profit"),
+        risk_reward       = data.get("risk_reward"),
+        funding_rate      = data.get("funding_rate"),
+        confidence        = data.get("confidence", 0.0),
     )
-    logger.info("Signal saved: %s %s @ %.6f", signal.symbol, signal.signal_type, float(signal.price))
+    logger.info(
+        "Signal saved: %s %s @ %.6f | conf=%.2f | RR=%.2f | funding=%s",
+        signal.symbol, signal.signal_type, float(signal.price),
+        signal.confidence,
+        signal.risk_reward or 0,
+        f"{signal.funding_rate:.4f}" if signal.funding_rate is not None else "n/a",
+    )
     return signal
 
 
@@ -48,12 +59,13 @@ def _save_signal(data: dict):
 def scan_markets(self):
     """
     Main periodic task:
-    1. Fetch all USDT-SWAP instruments
+    1. Fetch top-N USDT-SWAP instruments by 24h volume
     2. Analyze each one (M15 breakout, 1H regression, volume anomaly)
-    3. Persist new signals
-    4. Queue Telegram alerts
+    3. Enrich each signal with funding rate
+    4. Persist new signals
+    5. Queue Telegram alerts
     """
-    from apps.scanner.okx_client import get_top_symbols_by_volume
+    from apps.scanner.okx_client import get_top_symbols_by_volume, get_funding_rate
     from apps.scanner.analysis import analyze_symbol
 
     logger.info("scan_markets started")
@@ -63,22 +75,28 @@ def scan_markets(self):
         return
 
     total_signals = 0
-    # Rate-limit: ~200ms between requests to stay within OKX public limits
+    # Rate-limit: ~200ms between symbols to stay within OKX public limits
     for inst_id in instruments:
         try:
             signals = analyze_symbol(inst_id)
+
+            # Fetch funding rate once per symbol (cached 8 min)
+            funding = get_funding_rate(inst_id)
+
             for data in signals:
-                symbol = data["symbol"]
+                symbol   = data["symbol"]
                 sig_type = data["signal_type"]
-                tf = data.get("timeframe", "")
+                tf       = data.get("timeframe", "")
 
                 if _is_duplicate(symbol, sig_type, tf):
                     continue
 
+                # Inject funding rate into signal data
+                data["funding_rate"] = funding
+
                 signal = _save_signal(data)
                 total_signals += 1
 
-                # Queue Telegram alert (non-blocking)
                 from apps.alerts.tasks import send_telegram_alert
                 send_telegram_alert.apply_async(
                     args=[signal.id],
@@ -98,11 +116,14 @@ def scan_markets(self):
 def scan_single_symbol(self, symbol: str):
     """Trigger analysis for a single symbol (used for manual refresh)."""
     from apps.scanner.analysis import analyze_symbol
+    from apps.scanner.okx_client import get_funding_rate
 
+    funding = get_funding_rate(symbol)
     signals = analyze_symbol(symbol)
     saved_ids = []
     for data in signals:
         if not _is_duplicate(data["symbol"], data["signal_type"], data.get("timeframe", "")):
+            data["funding_rate"] = funding
             sig = _save_signal(data)
             saved_ids.append(sig.id)
             from apps.alerts.tasks import send_telegram_alert

@@ -72,6 +72,10 @@ def get_candles(inst_id: str, bar: str, limit: int = 21) -> Optional[list[dict]]
 
     OKX returns candles newest-first. We reverse so index 0 = oldest.
     Each dict: {ts, open, high, low, close, volume}
+
+    volume = volCcyQuote (24h volume in USDT) for cross-asset comparability.
+    Only confirmed (closed) candles are included (confirm == "1").
+
     bar examples: "15m", "1H"
     """
     try:
@@ -86,13 +90,17 @@ def get_candles(inst_id: str, bar: str, limit: int = 21) -> Optional[list[dict]]
         candles = []
         for row in reversed(raw):  # oldest first
             try:
+                # 1.1 — Only include confirmed (closed) candles
+                if str(row[8]) != "1":
+                    continue
                 candles.append({
-                    "ts": int(row[0]),
-                    "open": float(row[1]),
-                    "high": float(row[2]),
-                    "low": float(row[3]),
-                    "close": float(row[4]),
-                    "volume": float(row[5]),
+                    "ts":     int(row[0]),
+                    "open":   float(row[1]),
+                    "high":   float(row[2]),
+                    "low":    float(row[3]),
+                    "close":  float(row[4]),
+                    # 1.2 — Use volCcyQuote (USDT volume) for cross-asset comparability
+                    "volume": float(row[7]) if row[7] else float(row[5]),
                 })
             except (IndexError, ValueError):
                 continue
@@ -112,4 +120,30 @@ def get_ticker(inst_id: str) -> Optional[float]:
         data = result.get("data", [{}])
         return float(data[0].get("last", 0)) if data else None
     except Exception:
+        return None
+
+
+def get_funding_rate(inst_id: str) -> Optional[float]:
+    """
+    Return the current funding rate for a USDT perpetual swap.
+    Cached 8 minutes (funding updates every 8h but can change intraday).
+    Returns None if unavailable.
+    """
+    cache_key = f"okx:funding:{inst_id}"
+    cached = cache.get(cache_key)
+    if cached is not None:
+        return cached
+
+    try:
+        pub = _public_api()
+        result = pub.get_funding_rate(instId=inst_id)
+        if result.get("code") != "0":
+            return None
+        data = result.get("data", [{}])
+        rate = float(data[0].get("fundingRate", 0)) if data else None
+        if rate is not None:
+            cache.set(cache_key, rate, timeout=480)  # 8 min
+        return rate
+    except Exception as exc:
+        logger.debug("Failed to fetch funding rate for %s: %s", inst_id, exc)
         return None

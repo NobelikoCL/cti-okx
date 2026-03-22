@@ -147,8 +147,13 @@ TELEGRAM_CHAT_ID = env("TELEGRAM_CHAT_ID", default="")
 # ── Scanner ───────────────────────────────────────────────────────────────────
 SCANNER_TIMEFRAMES = env.list("SCANNER_TIMEFRAMES", default=["15m", "1H", "4H", "1D"])
 SCANNER_INTERVAL = env.int("SCANNER_INTERVAL", default=900)   # seconds (default: 15 min)
-VOLUME_THRESHOLD = env.float("VOLUME_THRESHOLD", default=1.5)
+VOLUME_THRESHOLD = env.float("VOLUME_THRESHOLD", default=2.0)   # z-score min (Tier 2)
 BREAKOUT_THRESHOLD_PCT = env.float("BREAKOUT_THRESHOLD_PCT", default=0.002)
+BREAKOUT_VOL_MIN_RATIO = env.float("BREAKOUT_VOL_MIN_RATIO", default=1.5)  # vol confirmation
+REGRESSION_R2_MIN = env.float("REGRESSION_R2_MIN", default=0.65)           # raised from 0.55
+REGRESSION_PVALUE_MAX = env.float("REGRESSION_PVALUE_MAX", default=0.05)   # significance test
+RSI_OVERBOUGHT = env.float("RSI_OVERBOUGHT", default=75.0)
+RSI_OVERSOLD = env.float("RSI_OVERSOLD", default=25.0)
 MAX_SIGNALS_PER_ASSET = env.int("MAX_SIGNALS_PER_ASSET", default=3)
 QUOTE_CURRENCY = env("QUOTE_CURRENCY", default="USDT")
 TOP_SYMBOLS_COUNT = env.int("TOP_SYMBOLS_COUNT", default=50)  # top N by 24h USDT volume

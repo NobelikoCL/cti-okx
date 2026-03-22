@@ -3,11 +3,11 @@ from django.db import models
 
 class Signal(models.Model):
     class SignalType(models.TextChoices):
-        BREAKOUT_BULL = "BREAKOUT_BULL", "Ruptura Alcista (M15)"
-        BREAKOUT_BEAR = "BREAKOUT_BEAR", "Ruptura Bajista (M15)"
+        BREAKOUT_BULL   = "BREAKOUT_BULL",   "Ruptura Alcista (M15)"
+        BREAKOUT_BEAR   = "BREAKOUT_BEAR",   "Ruptura Bajista (M15)"
         REGRESSION_BULL = "REGRESSION_BULL", "Regresión Alcista (1H)"
         REGRESSION_BEAR = "REGRESSION_BEAR", "Regresión Bajista (1H)"
-        VOLUME_ANOMALY = "VOLUME_ANOMALY", "Anomalía de Volumen"
+        VOLUME_ANOMALY  = "VOLUME_ANOMALY",  "Anomalía de Volumen"
 
     symbol = models.CharField(max_length=50, db_index=True)
     signal_type = models.CharField(
@@ -16,17 +16,29 @@ class Signal(models.Model):
     timeframe = models.CharField(max_length=10)
     price = models.DecimalField(max_digits=24, decimal_places=8)
 
-    # Breakout fields
+    # ── Breakout fields ───────────────────────────────────────────────────────
     breakout_level = models.DecimalField(
         max_digits=24, decimal_places=8, null=True, blank=True
     )
 
-    # Regression fields
+    # ── Regression fields ─────────────────────────────────────────────────────
     regression_slope = models.FloatField(null=True, blank=True)
-    regression_r2 = models.FloatField(null=True, blank=True)
+    regression_r2    = models.FloatField(null=True, blank=True)
 
-    # Volume field
+    # ── Volume field ──────────────────────────────────────────────────────────
     volume_ratio = models.FloatField(null=True, blank=True)
+
+    # ── Quantitative enrichment (Tier 3) ──────────────────────────────────────
+    rsi          = models.FloatField(null=True, blank=True)          # RSI(14) en vela actual
+    atr          = models.FloatField(null=True, blank=True)          # ATR(14) M15
+    stop_loss    = models.DecimalField(
+        max_digits=24, decimal_places=8, null=True, blank=True
+    )
+    take_profit  = models.DecimalField(
+        max_digits=24, decimal_places=8, null=True, blank=True
+    )
+    risk_reward  = models.FloatField(null=True, blank=True)          # TP/SL ratio
+    funding_rate = models.FloatField(null=True, blank=True)          # funding perpetuo
 
     confidence = models.FloatField(default=0.0)
     is_sent_telegram = models.BooleanField(default=False, db_index=True)
@@ -48,3 +60,8 @@ class Signal(models.Model):
         if "BEAR" in self.signal_type:
             return "SHORT"
         return "NEUTRAL"
+
+    @property
+    def funding_extreme(self) -> bool:
+        """True if |funding_rate| > 0.1% — indicates crowded/leveraged market."""
+        return self.funding_rate is not None and abs(self.funding_rate) > 0.001

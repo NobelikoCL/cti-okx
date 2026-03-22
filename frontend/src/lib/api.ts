@@ -19,6 +19,7 @@ export async function fetchSignals(
   const params: Record<string, string | number> = {};
   if (filters.search) params.search = filters.search;
   if (filters.signal_type) params.signal_type = filters.signal_type;
+  if (filters.direction) params.direction = filters.direction;
   if (filters.timeframe) params.timeframe = filters.timeframe;
   if (filters.min_confidence) params.min_confidence = filters.min_confidence;
   if (filters.ordering) params.ordering = filters.ordering;
