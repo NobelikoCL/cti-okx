@@ -42,6 +42,7 @@ class Signal(models.Model):
     trend_reversal  = models.BooleanField(null=True, blank=True)     # EMA crossover detectado
 
     confidence = models.FloatField(default=0.0)
+    repeat_count = models.PositiveIntegerField(default=1)  # how many times this symbol+type fired in 24h
     is_sent_telegram = models.BooleanField(default=False, db_index=True)
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
 

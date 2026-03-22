@@ -162,6 +162,14 @@ function SignalRow({ signal, onSend, sending }: { signal: Signal; onSend: () => 
           <span className={clsx("px-2 py-0.5 rounded-md border text-xs font-medium", TYPE_BADGE[signal.signal_type])}>
             {signal.signal_type_display}
           </span>
+          {signal.repeat_count > 1 && (
+            <span
+              title={`Este activo ha generado esta señal ×${signal.repeat_count} en las últimas 24h`}
+              className="ml-1.5 px-1.5 py-0.5 rounded text-xs font-bold bg-orange-900 text-orange-300 border border-orange-700"
+            >
+              ×{signal.repeat_count}
+            </span>
+          )}
         </td>
         <td className="px-4 py-3">
           <span className={clsx("px-2 py-0.5 rounded text-xs font-bold", DIR_BADGE[signal.direction])}>

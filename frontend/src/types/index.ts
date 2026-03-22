@@ -29,6 +29,7 @@ export interface Signal {
   funding_extreme: boolean;
   trend_reversal: boolean | null;
   confidence: number;
+  repeat_count: number;
   is_sent_telegram: boolean;
   created_at: string;
 }

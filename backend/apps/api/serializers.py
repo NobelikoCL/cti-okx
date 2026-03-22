@@ -31,6 +31,7 @@ class SignalSerializer(serializers.ModelSerializer):
             "funding_extreme",
             "trend_reversal",
             "confidence",
+            "repeat_count",
             "is_sent_telegram",
             "created_at",
         ]

@@ -51,6 +51,8 @@ def _build_message(signal) -> str:
         lines.append(f"📦 Vol ratio: <code>{signal.volume_ratio:.2f}x</code>")
 
     lines.append(f"🎲 Confianza: <code>{signal.confidence * 100:.1f}%</code>")
+    if signal.repeat_count > 1:
+        lines.append(f"🔁 Repetición ×{signal.repeat_count} en las últimas 24h")
     lines.append(f"🕐 {signal.created_at.strftime('%Y-%m-%d %H:%M UTC')}")
 
     return "\n".join(lines)

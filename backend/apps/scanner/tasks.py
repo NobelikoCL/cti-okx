@@ -26,8 +26,20 @@ def _is_duplicate(symbol: str, signal_type: str, timeframe: str) -> bool:
     ).exists()
 
 
+def _count_recent(symbol: str, signal_type: str) -> int:
+    """Count signals for this symbol+type in the last 24 hours (excluding the one being saved)."""
+    from apps.signals.models import Signal
+    cutoff = timezone.now() - timedelta(hours=24)
+    return Signal.objects.filter(
+        symbol=symbol,
+        signal_type=signal_type,
+        created_at__gte=cutoff,
+    ).count()
+
+
 def _save_signal(data: dict):
     from apps.signals.models import Signal
+    repeat_count = _count_recent(data["symbol"], data["signal_type"]) + 1
     signal = Signal.objects.create(
         symbol        = data["symbol"],
         signal_type   = data["signal_type"],
@@ -45,6 +57,7 @@ def _save_signal(data: dict):
         funding_rate      = data.get("funding_rate"),
         trend_reversal    = data.get("trend_reversal"),
         confidence        = data.get("confidence", 0.0),
+        repeat_count      = repeat_count,
     )
     logger.info(
         "Signal saved: %s %s @ %.6f | conf=%.2f | RR=%.2f | funding=%s",
