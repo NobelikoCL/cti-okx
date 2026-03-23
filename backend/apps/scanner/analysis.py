@@ -259,11 +259,15 @@ def detect_regression_signal(candles: list[dict], timeframe: str = "1H") -> Opti
     pval_factor  = 1.0 - float(p_value)
     confidence   = round(0.50 * r2_factor + 0.30 * slope_factor + 0.20 * pval_factor, 4)
 
+    # Emit REVERSAL type when slope changed direction; REGRESSION when continuing trend
+    bull_type = "REVERSAL_BULL" if regression_reversal else "REGRESSION_BULL"
+    bear_type = "REVERSAL_BEAR" if regression_reversal else "REGRESSION_BEAR"
+
     if slope_pct > 0.0005:
         sl, tp = _sl_tp(price, atr_val, "LONG")
         rr = (tp - price) / (price - sl) if (price - sl) > 0 else None
         return {
-            "signal_type":       "REGRESSION_BULL",
+            "signal_type":       bull_type,
             "direction":         "LONG",
             "timeframe":         timeframe,
             "price":             price,
@@ -282,7 +286,7 @@ def detect_regression_signal(candles: list[dict], timeframe: str = "1H") -> Opti
         sl, tp = _sl_tp(price, atr_val, "SHORT")
         rr = (price - tp) / (sl - price) if (sl - price) > 0 else None
         return {
-            "signal_type":       "REGRESSION_BEAR",
+            "signal_type":       bear_type,
             "direction":         "SHORT",
             "timeframe":         timeframe,
             "price":             price,

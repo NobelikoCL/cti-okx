@@ -114,6 +114,28 @@ export const MOCK_SIGNALS: Signal[] = [
     risk_reward: 1.33, funding_rate: 0.00031, funding_extreme: false,
     confidence: 0.88, repeat_count: 1, is_sent_telegram: true, trend_reversal: null, created_at: ago(90),
   },
+  {
+    id: 11, symbol: "LINK-USDT-SWAP",
+    signal_type: "REVERSAL_BULL", signal_type_display: "Reversión Alcista (1H)",
+    direction: "LONG", timeframe: "1H",
+    price: "14.82000000", breakout_level: null,
+    regression_slope: 0.00063, regression_r2: 0.814,
+    volume_ratio: null, rsi: 54.3, atr: 0.19200,
+    stop_loss: "14.53360000", take_profit: "15.20760000",
+    risk_reward: 1.33, funding_rate: 0.00015, funding_extreme: false,
+    confidence: 0.81, repeat_count: 1, is_sent_telegram: true, trend_reversal: true, created_at: ago(5),
+  },
+  {
+    id: 12, symbol: "DOGE-USDT-SWAP",
+    signal_type: "REVERSAL_BEAR", signal_type_display: "Reversión Bajista (1H)",
+    direction: "SHORT", timeframe: "1H",
+    price: "0.16840000", breakout_level: null,
+    regression_slope: -0.00071, regression_r2: 0.778,
+    volume_ratio: null, rsi: 43.7, atr: 0.00210,
+    stop_loss: "0.17155000", take_profit: "0.16525000",
+    risk_reward: 1.33, funding_rate: -0.00022, funding_extreme: false,
+    confidence: 0.76, repeat_count: 1, is_sent_telegram: false, trend_reversal: true, created_at: ago(18),
+  },
 ];
 
 export const MOCK_STATS: SignalStats = {
@@ -125,6 +147,8 @@ export const MOCK_STATS: SignalStats = {
     REGRESSION_BULL: MOCK_SIGNALS.filter((s) => s.signal_type === "REGRESSION_BULL").length,
     REGRESSION_BEAR: MOCK_SIGNALS.filter((s) => s.signal_type === "REGRESSION_BEAR").length,
     VOLUME_ANOMALY:  MOCK_SIGNALS.filter((s) => s.signal_type === "VOLUME_ANOMALY").length,
+    REVERSAL_BULL:   MOCK_SIGNALS.filter((s) => s.signal_type === "REVERSAL_BULL").length,
+    REVERSAL_BEAR:   MOCK_SIGNALS.filter((s) => s.signal_type === "REVERSAL_BEAR").length,
   },
 };
 

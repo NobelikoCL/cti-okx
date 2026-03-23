@@ -7,6 +7,8 @@ const SIGNAL_TYPES: { value: SignalType | ""; label: string }[] = [
   { value: "REGRESSION_BULL", label: "↑ Regresión Alcista" },
   { value: "REGRESSION_BEAR", label: "↓ Regresión Bajista" },
   { value: "VOLUME_ANOMALY",  label: "⚡ Anomalía Volumen" },
+  { value: "REVERSAL_BULL",   label: "🔄 Reversión Alcista" },
+  { value: "REVERSAL_BEAR",   label: "🔄 Reversión Bajista" },
 ];
 
 const TIMEFRAMES = [

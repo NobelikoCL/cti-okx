@@ -37,8 +37,10 @@ class ScannerConfig(models.Model):
     # Telegram noise filters
     telegram_cooldown_minutes      = models.PositiveIntegerField(default=15)
     telegram_min_confidence_tg     = models.FloatField(default=0.0)
-    # Only send regression signals when slope changed direction (alcista↔bajista)
+    # Legacy filter (kept for DB compat; logic replaced by REVERSAL signal type)
     telegram_regression_reversal   = models.BooleanField(default=False)
+    # Toggle for the new REVERSAL_BULL / REVERSAL_BEAR signal type
+    telegram_reversal              = models.BooleanField(default=True)
 
     # Automatic scan interval (minutes) — controls Celery Beat schedule
     scan_interval_minutes = models.PositiveIntegerField(default=15)
@@ -53,12 +55,9 @@ class ScannerConfig(models.Model):
         if signal_type == "VOLUME_ANOMALY":
             return self.telegram_volume
         if signal_type in ("REGRESSION_BULL", "REGRESSION_BEAR"):
-            if not self.telegram_regression:
-                return False
-            # If regression reversal filter is ON, only send when slope changed direction
-            if self.telegram_regression_reversal and not trend_reversal:
-                return False
-            return True
+            return bool(self.telegram_regression)
+        if signal_type in ("REVERSAL_BULL", "REVERSAL_BEAR"):
+            return bool(self.telegram_reversal)
         return False
 
     class Meta:

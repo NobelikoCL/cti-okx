@@ -8,6 +8,8 @@ class Signal(models.Model):
         REGRESSION_BULL = "REGRESSION_BULL", "Regresión Alcista (1H)"
         REGRESSION_BEAR = "REGRESSION_BEAR", "Regresión Bajista (1H)"
         VOLUME_ANOMALY  = "VOLUME_ANOMALY",  "Anomalía de Volumen"
+        REVERSAL_BULL   = "REVERSAL_BULL",   "Reversión Alcista (1H)"
+        REVERSAL_BEAR   = "REVERSAL_BEAR",   "Reversión Bajista (1H)"
 
     symbol = models.CharField(max_length=50, db_index=True)
     signal_type = models.CharField(

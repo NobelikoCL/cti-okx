@@ -3,7 +3,9 @@ export type SignalType =
   | "BREAKOUT_BEAR"
   | "REGRESSION_BULL"
   | "REGRESSION_BEAR"
-  | "VOLUME_ANOMALY";
+  | "VOLUME_ANOMALY"
+  | "REVERSAL_BULL"
+  | "REVERSAL_BEAR";
 
 export type Direction = "LONG" | "SHORT" | "NEUTRAL";
 
@@ -67,6 +69,7 @@ export interface ScannerConfig {
   telegram_cooldown_minutes: number;
   telegram_min_confidence_tg: number;
   telegram_regression_reversal: boolean;
+  telegram_reversal: boolean;
   scan_interval_minutes: number;
 }
 

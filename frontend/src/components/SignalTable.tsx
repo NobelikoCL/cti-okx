@@ -23,6 +23,8 @@ const TYPE_BADGE: Record<string, string> = {
   REGRESSION_BULL: "bg-teal-900 text-teal-300 border-teal-700",
   REGRESSION_BEAR: "bg-rose-900 text-rose-300 border-rose-700",
   VOLUME_ANOMALY:  "bg-yellow-900 text-yellow-300 border-yellow-700",
+  REVERSAL_BULL:   "bg-violet-900 text-violet-300 border-violet-700",
+  REVERSAL_BEAR:   "bg-orange-900 text-orange-300 border-orange-700",
 };
 
 const DIR_BADGE: Record<string, string> = {

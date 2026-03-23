@@ -190,6 +190,7 @@ def scanner_config(request):
             "telegram_cooldown_minutes":     cfg.telegram_cooldown_minutes,
             "telegram_min_confidence_tg":    cfg.telegram_min_confidence_tg,
             "telegram_regression_reversal":  cfg.telegram_regression_reversal,
+            "telegram_reversal":             cfg.telegram_reversal,
             "scan_interval_minutes":         cfg.scan_interval_minutes,
         })
 
@@ -200,7 +201,7 @@ def scanner_config(request):
         "telegram_breakout", "telegram_volume", "telegram_regression",
         "telegram_reversal_filter", "ema_fast", "ema_slow",
         "telegram_cooldown_minutes", "telegram_min_confidence_tg",
-        "telegram_regression_reversal", "scan_interval_minutes",
+        "telegram_regression_reversal", "telegram_reversal", "scan_interval_minutes",
     }
     for field, value in request.data.items():
         if field in allowed:
