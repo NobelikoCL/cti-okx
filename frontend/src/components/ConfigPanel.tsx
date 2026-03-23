@@ -38,6 +38,7 @@ export default function ConfigPanel() {
     telegram_cooldown_minutes:       15,
     telegram_min_confidence_tg:      0,
     telegram_regression_reversal:    false,
+    telegram_reversal:               true,
     scan_interval_minutes:           15,
   });
   const [saved, setSaved] = useState(false);
