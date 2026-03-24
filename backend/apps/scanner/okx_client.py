@@ -64,6 +64,12 @@ def get_top_symbols_by_volume(n: int = 50) -> list[str]:
         return []
 
 
+_CANDLE_TTL = {
+    "1m": 60, "3m": 180, "5m": 300, "15m": 900, "30m": 1800,
+    "1H": 3600, "2H": 7200, "4H": 14400, "6H": 21600, "12H": 43200, "1D": 86400,
+}
+
+
 def get_candles(inst_id: str, bar: str, limit: int = 21) -> Optional[list[dict]]:
     """
     Fetch candlestick data for a given instrument and timeframe.
@@ -73,9 +79,15 @@ def get_candles(inst_id: str, bar: str, limit: int = 21) -> Optional[list[dict]]
 
     volume = volCcyQuote (24h volume in USDT) for cross-asset comparability.
     Only confirmed (closed) candles are included (confirm == "1").
+    Cached for the duration of the timeframe to avoid redundant API calls.
 
     bar examples: "15m", "1H"
     """
+    cache_key = f"okx:candles:{inst_id}:{bar}:{limit}"
+    cached = cache.get(cache_key)
+    if cached is not None:
+        return cached
+
     try:
         mkt = _market_api()
         result = mkt.get_candlesticks(instId=inst_id, bar=bar, limit=str(limit))
@@ -102,6 +114,10 @@ def get_candles(inst_id: str, bar: str, limit: int = 21) -> Optional[list[dict]]
                 })
             except (IndexError, ValueError):
                 continue
+
+        if candles:
+            ttl = _CANDLE_TTL.get(bar, 600)
+            cache.set(cache_key, candles, timeout=ttl)
         return candles if candles else None
     except Exception as exc:
         logger.exception("Failed to fetch candles %s/%s: %s", inst_id, bar, exc)
@@ -140,7 +156,7 @@ def get_funding_rate(inst_id: str) -> Optional[float]:
         data = result.get("data", [{}])
         rate = float(data[0].get("fundingRate", 0)) if data else None
         if rate is not None:
-            cache.set(cache_key, rate, timeout=480)  # 8 min
+            cache.set(cache_key, rate, timeout=1800)  # 30 min (funding updates every 8h)
         return rate
     except Exception as exc:
         logger.debug("Failed to fetch funding rate for %s: %s", inst_id, exc)
